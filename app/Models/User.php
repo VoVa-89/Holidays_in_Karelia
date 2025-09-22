@@ -21,7 +21,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name Имя пользователя
  * @property string $email Email пользователя (уникальный)
  * @property string $password Хешированный пароль
- * @property string $role Роль пользователя (user|admin)
+ * @property string $role Роль пользователя (user|admin|superadmin)
  * @property \Carbon\Carbon|null $email_verified_at Дата подтверждения email
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -44,6 +44,8 @@ final class User extends Authenticatable
         'email',
         'password',
         'role',
+        'email_notifications',
+        'public_profile',
     ];
 
     /**
@@ -64,6 +66,8 @@ final class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'email_notifications' => 'boolean',
+        'public_profile' => 'boolean',
     ];
 
     /**
@@ -93,11 +97,21 @@ final class User extends Authenticatable
     /**
      * Проверить, является ли пользователь администратором
      * 
-     * @return bool true если роль пользователя 'admin'
+     * @return bool true если роль пользователя 'admin' или 'superadmin'
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['admin', 'superadmin']);
+    }
+
+    /**
+     * Проверить, является ли пользователь супер-администратором
+     * 
+     * @return bool true если роль пользователя 'superadmin'
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'superadmin';
     }
 
     /**
@@ -114,4 +128,5 @@ final class User extends Authenticatable
     {
         return $this->isAdmin() || $this->id === $post->user_id;
     }
+
 }

@@ -58,6 +58,16 @@
                             <i class="fas fa-gavel me-1"></i>Модерация
                         </a>
                     </li>
+                    
+                    <!-- Управление пользователями (только для супер-администраторов) -->
+                    @if(Auth::user()->isSuperAdmin())
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}" 
+                               href="{{ route('admin.users') }}">
+                                <i class="fas fa-users me-1"></i>Управление пользователями
+                            </a>
+                        </li>
+                    @endif
                 </ul>
 
                 <!-- User Menu -->
@@ -142,7 +152,11 @@
                 <div class="col-md-6 text-end">
                     <small class="text-muted">
                         <i class="fas fa-user-shield me-1"></i>
-                        Администратор: {{ Auth::user()->name }}
+                        @if(Auth::user()->isSuperAdmin())
+                            Супер-администратор: {{ Auth::user()->name }}
+                        @else
+                            Администратор: {{ Auth::user()->name }}
+                        @endif
                     </small>
                 </div>
             </div>

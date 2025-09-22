@@ -163,6 +163,7 @@
                                         'address' => $p->address,
                                         'rating' => $p->rating,
                                         'category' => optional($p->category)->name ?? '',
+                                        'category_slug' => optional($p->category)->slug ?? '',
                                     ],
                                     'geo' => [(float)$p->latitude, (float)$p->longitude],
                                 ];
@@ -172,6 +173,7 @@
 
                         // Добавляем метки на карту
                         markers.forEach(function(marker) {
+                            console.log('📍 Добавляем метку:', marker.p.title, 'Категория slug:', marker.p.category_slug);
                             addPlacemark(marker.geo, marker.p.title, marker.p.slug, marker.p);
                         });
 
@@ -228,9 +230,17 @@
                 }
                 
                 if (postData.category) {
+                    // Определяем цвет категории в зависимости от типа
+                    let categoryColor = '#17a2b8'; // По умолчанию синий
+                    if (postData.category_slug === 'dostoprimechatelnosti') {
+                        categoryColor = '#28a745'; // Зеленый для достопримечательностей
+                    } else if (postData.category_slug === 'mesta-otdykha') {
+                        categoryColor = '#007bff'; // Синий для мест отдыха
+                    }
+                    
                     balloonContent += `
                         <div class="mb-2">
-                            <span style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
+                            <span style="background: ${categoryColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
                                 <i class="fas fa-folder" style="margin-right: 4px;"></i>${postData.category}
                             </span>
                         </div>
@@ -256,12 +266,27 @@
                 </div>
             `;
 
+            // Определяем цвет метки в зависимости от категории
+            let iconPreset = 'islands#greenIcon'; // По умолчанию зеленый
+            console.log('🎨 Определяем цвет для:', title, 'category_slug:', postData?.category_slug);
+            if (postData && postData.category_slug) {
+                if (postData.category_slug === 'dostoprimechatelnosti') {
+                    iconPreset = 'islands#greenIcon'; // Зеленый для достопримечательностей
+                    console.log('✅ Установлен зеленый цвет для достопримечательности');
+                } else if (postData.category_slug === 'mesta-otdykha') {
+                    iconPreset = 'islands#blueIcon'; // Синий для мест отдыха
+                    console.log('✅ Установлен синий цвет для места отдыха');
+                }
+            } else {
+                console.log('⚠️ Нет данных о категории или category_slug пустой');
+            }
+
             // Создаем метку
             const placemark = new ymaps.Placemark(coordinates, {
                 balloonContent: balloonContent,
                 hintContent: title
             }, {
-                preset: 'islands#greenIcon',
+                preset: iconPreset,
                 balloonMaxWidth: 300,
                 balloonCloseButton: true,
                 balloonAutoPan: true

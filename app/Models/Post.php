@@ -27,6 +27,7 @@ use Illuminate\Support\Str;
  * @property string $address Адрес места
  * @property float $latitude Широта (10 цифр, 8 после запятой)
  * @property float $longitude Долгота (11 цифр, 8 после запятой)
+ * @property string|null $website_url Ссылка на сайт
  * @property string $status Статус публикации (draft|moderation|published|rejected)
  * @property float $rating Средний рейтинг (3 цифры, 2 после запятой)
  * @property int $views Количество просмотров
@@ -64,6 +65,7 @@ final class Post extends Model
         'title',
         'slug',
         'description',
+        'content',
         'address',
         'latitude',
         'longitude',
@@ -72,6 +74,7 @@ final class Post extends Model
         'views',
         'rejection_reason',
         'rejected_at',
+        'website_url',
     ];
 
     protected $casts = [

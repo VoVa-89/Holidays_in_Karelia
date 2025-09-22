@@ -13,7 +13,7 @@
 
 		<!-- Основное меню -->
 		<div class="collapse navbar-collapse" id="navbarNav">
-			<ul class="navbar-nav me-auto">
+			<ul class="navbar-nav me-auto flex-nowrap">
 				<!-- Главная -->
 				<li class="nav-item">
 					<a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
@@ -48,13 +48,20 @@
 					</a>
 				</li>
 
+				<!-- Правила публикации -->
+				<li class="nav-item">
+					<a class="nav-link {{ request()->routeIs('guidelines') ? 'active' : '' }}" href="{{ route('guidelines') }}">
+						<i class="fas fa-book-open me-1"></i>Правила
+					</a>
+				</li>
+
 				<!-- Админ-панель (только для администраторов) -->
 				@auth
 					@if(auth()->user()->isAdmin())
 						<li class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle {{ request()->routeIs('admin.*') ? 'active' : '' }}" 
+								<a class="nav-link dropdown-toggle {{ request()->routeIs('admin.*') ? 'active' : '' }}" 
 							   href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-								<i class="fas fa-cog me-1"></i>Админ-панель
+									<i class="fas fa-cog me-1"></i>Админ
 							</a>
 							<ul class="dropdown-menu">
 								<li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">
@@ -75,6 +82,14 @@
 								<li><a class="dropdown-item" href="{{ route('categories.create') }}">
 									<i class="fas fa-plus me-2"></i>Создать категорию
 								</a></li>
+								
+								<!-- Управление пользователями (только для супер-администраторов) -->
+								@if(auth()->user()->isSuperAdmin())
+									<li><hr class="dropdown-divider"></li>
+									<li><a class="dropdown-item" href="{{ route('admin.users') }}">
+										<i class="fas fa-users me-2"></i>Управление пользователями
+									</a></li>
+								@endif
 								@php
 									$currentCategory = null;
 									if (request()->routeIs('categories.show') || request()->routeIs('categories.edit')) {
@@ -152,7 +167,7 @@
 							<li><hr class="dropdown-divider"></li>
 							
 							<!-- Профиль -->
-							<li><a class="dropdown-item" href="#">
+							<li><a class="dropdown-item" href="{{ route('profile.show') }}">
 								<i class="fas fa-user me-2"></i>Мой профиль
 							</a></li>
 							
@@ -162,18 +177,29 @@
 							</a></li>
 							
 							<!-- Настройки -->
-							<li><a class="dropdown-item" href="#">
+							<li><a class="dropdown-item" href="{{ route('profile.settings') }}">
 								<i class="fas fa-cog me-2"></i>Настройки
 							</a></li>
 							
 							@if(auth()->user()->isAdmin())
 								<li><hr class="dropdown-divider"></li>
 								<li class="dropdown-header">
-									<small class="text-muted">Администратор</small>
+									<small class="text-muted">
+										@if(auth()->user()->isSuperAdmin())
+											Супер-администратор
+										@else
+											Администратор
+										@endif
+									</small>
 								</li>
 								<li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">
 									<i class="fas fa-tachometer-alt me-2"></i>Панель управления
 								</a></li>
+								@if(auth()->user()->isSuperAdmin())
+									<li><a class="dropdown-item" href="{{ route('admin.users') }}">
+										<i class="fas fa-users me-2"></i>Управление пользователями
+									</a></li>
+								@endif
 							@endif
 							
 							<li><hr class="dropdown-divider"></li>
@@ -214,6 +240,15 @@
 	.nav-link:hover {
 		color: var(--bs-primary) !important;
 	}
+
+	/* Не переносить пункты меню и экономить место */
+	.navbar .nav-link,
+	.navbar .dropdown-toggle {
+		white-space: nowrap;
+	}
+
+	/* Уменьшаем горизонтальные отступы у ссылок */
+	.navbar .nav-link { padding-left: .5rem; padding-right: .5rem; }
 	
 	.dropdown-menu {
 		border: none;

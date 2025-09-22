@@ -49,6 +49,15 @@
 						<div class="content">
 							{{ strip_tags($post->description) }}
 						</div>
+
+						@if($post->website_url)
+							<div class="mt-3">
+								<a href="{{ $post->website_url }}" target="_blank" rel="noopener noreferrer" 
+								   class="btn btn-outline-primary">
+									<i class="fas fa-external-link-alt me-2"></i>Официальный сайт
+								</a>
+							</div>
+						@endif
 					</div>
 				</div>
 

@@ -107,6 +107,7 @@
                     <ul class="list-unstyled">
                         <li><a href="{{ route('home') }}" class="text-light text-decoration-none">Главная</a></li>
                         <li><a href="{{ route('categories.index') }}" class="text-light text-decoration-none">Категории</a></li>
+                        <li><a href="{{ route('guidelines') }}" class="text-light text-decoration-none">Правила публикации</a></li>
                         @auth
                             <li><a href="{{ route('posts.create') }}" class="text-light text-decoration-none">Добавить пост</a></li>
                             @if(Auth::user()->isAdmin())
@@ -118,8 +119,8 @@
                 <div class="col-md-3">
                     <h6 class="fw-bold mb-3">Контакты</h6>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-envelope me-2"></i>info@karelia-travel.ru</li>
-                        <li><i class="fas fa-phone me-2"></i>+7 (8142) 123-456</li>
+                        <li><i class="fas fa-envelope me-2"></i>krupenkin.vov@yandex.ru</li>
+                        <li><i class="fas fa-phone me-2"></i>+7 (921) 222-30-98</li>
                         <li><i class="fas fa-map-marker-alt me-2"></i>Петрозаводск, Карелия</li>
                     </ul>
                 </div>

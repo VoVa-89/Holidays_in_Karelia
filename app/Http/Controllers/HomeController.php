@@ -24,7 +24,7 @@ final class HomeController extends Controller
         // Получаем посты с координатами для карты
         $mapPosts = Post::query()
             ->select(['id', 'title', 'slug', 'latitude', 'longitude', 'address', 'rating', 'category_id'])
-            ->with('category:id,name')
+            ->with('category:id,name,slug')
             ->where('status', 'published')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')

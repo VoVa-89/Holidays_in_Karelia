@@ -38,6 +38,16 @@
 								@enderror
 							</div>
 
+							<div class="mb-3">
+								<label for="website_url" class="form-label">Ссылка на сайт <span class="text-muted">(необязательно)</span></label>
+								<input type="url" id="website_url" name="website_url" class="form-control @error('website_url') is-invalid @enderror" 
+									   placeholder="https://example.com" value="{{ old('website_url', $post->website_url) }}">
+								<div class="form-text">Укажите ссылку на официальный сайт места или дополнительную информацию</div>
+								@error('website_url')
+									<div class="invalid-feedback">{{ $message }}</div>
+								@enderror
+							</div>
+
 							<div class="row g-3">
 								<div class="col-md-6">
 									<label for="category_id" class="form-label">Категория</label>
@@ -219,6 +229,57 @@
 				quill.root.innerHTML = initial ? initial : '';
 				document.getElementById('post-edit-form').addEventListener('submit', function(){
 					el.value = quill.root.innerHTML;
+				});
+
+				// Autosave draft for edit
+				const DRAFT_KEY = 'post_edit_draft_{{ $post->id }}';
+				function saveDraft() {
+					const data = {
+						title: document.getElementById('title')?.value || '',
+						description: quill.root.innerHTML || '',
+						category_id: document.getElementById('category_id')?.value || '',
+						address: document.getElementById('address')?.value || '',
+						website_url: document.getElementById('website_url')?.value || '',
+						latitude: document.getElementById('latitude')?.value || '',
+						longitude: document.getElementById('longitude')?.value || ''
+					};
+					try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch (_) {}
+				}
+				function loadDraft() {
+					try {
+						const raw = localStorage.getItem(DRAFT_KEY);
+						if (!raw) return;
+						const d = JSON.parse(raw);
+						if (d.title) document.getElementById('title').value = d.title;
+						if (d.description) { quill.root.innerHTML = d.description; el.value = d.description; }
+						if (d.category_id) document.getElementById('category_id').value = d.category_id;
+						if (d.address) document.getElementById('address').value = d.address;
+						if (d.website_url) document.getElementById('website_url').value = d.website_url;
+						if (d.latitude && d.longitude) {
+							document.getElementById('latitude').value = d.latitude;
+							document.getElementById('longitude').value = d.longitude;
+							const latIn = document.getElementById('latitude_input_edit_{{ $post->id }}');
+							const lngIn = document.getElementById('longitude_input_edit_{{ $post->id }}');
+							if (latIn) latIn.value = d.latitude;
+							if (lngIn) lngIn.value = d.longitude;
+							if (typeof window.updateEditMap{{ $post->id }} === 'function') {
+								window.updateEditMap{{ $post->id }}([parseFloat(d.latitude), parseFloat(d.longitude)]);
+							}
+						}
+					} catch (_) {}
+				}
+				['title','category_id','address','website_url','latitude','longitude'].forEach(id => {
+					const elx = document.getElementById(id);
+					if (elx) elx.addEventListener('input', saveDraft);
+				});
+				const latManual = document.getElementById('latitude_input_edit_{{ $post->id }}');
+				const lngManual = document.getElementById('longitude_input_edit_{{ $post->id }}');
+				if (latManual) latManual.addEventListener('input', saveDraft);
+				if (lngManual) lngManual.addEventListener('input', saveDraft);
+				quill.on('text-change', saveDraft);
+				window.addEventListener('load', loadDraft);
+				document.getElementById('post-edit-form').addEventListener('submit', function(){
+					try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
 				});
 			})();
 
@@ -406,7 +467,7 @@
 						input: input,
 						preview: preview,
 						mainIndexInput: mainIndex,
-						maxFiles: 10,
+						maxFiles: 20,
 						maxFileSize: 5 * 1024 * 1024, // 5MB
 						allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 					});

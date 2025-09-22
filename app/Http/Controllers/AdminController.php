@@ -168,4 +168,82 @@ final class AdminController extends Controller
             ->back()
             ->with('success', "Пост '{$post->title}' отклонен. Причина отправлена автору.");
     }
+
+    /**
+     * Управление пользователями (только для супер-администраторов)
+     * 
+     * @param Request $request
+     * @return View
+     */
+    public function users(Request $request): View
+    {
+        // Проверяем, что пользователь является супер-администратором
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'У вас нет прав для доступа к этой странице.');
+        }
+
+        $query = User::orderBy('created_at', 'desc');
+
+        // Фильтрация по роли
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Поиск по имени или email
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $users = $query->paginate(15);
+        $roles = ['user', 'admin', 'superadmin'];
+
+        return view('admin.users', compact('users', 'roles'));
+    }
+
+    /**
+     * Изменение роли пользователя (только для супер-администраторов)
+     * 
+     * @param Request $request
+     * @param int $id
+     * @return RedirectResponse
+     */
+    public function updateUserRole(Request $request, int $id): RedirectResponse
+    {
+        // Проверяем, что пользователь является супер-администратором
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'У вас нет прав для выполнения этого действия.');
+        }
+
+        $request->validate([
+            'role' => 'required|in:user,admin,superadmin',
+        ], [
+            'role.required' => 'Выберите роль пользователя.',
+            'role.in' => 'Выбранная роль недопустима.',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // Нельзя изменить роль самому себе
+        if ($user->id === auth()->id()) {
+            return redirect()
+                ->back()
+                ->with('error', 'Вы не можете изменить свою собственную роль.');
+        }
+
+        $oldRole = $user->role;
+        $user->update(['role' => $request->role]);
+
+        $roleNames = [
+            'user' => 'пользователь',
+            'admin' => 'администратор',
+            'superadmin' => 'супер-администратор'
+        ];
+
+        return redirect()
+            ->back()
+            ->with('success', "Роль пользователя '{$user->name}' изменена с '{$roleNames[$oldRole]}' на '{$roleNames[$request->role]}'.");
+    }
 }

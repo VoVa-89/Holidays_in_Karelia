@@ -7,6 +7,15 @@
 	<div class="container my-4">
 		<h1 class="h3 mb-3"><i class="fas fa-plus text-primary me-2"></i>Создание поста</h1>
 
+		<!-- Краткие правила публикации -->
+		<div class="alert alert-info d-flex align-items-center" role="alert">
+			<i class="fas fa-info-circle me-2"></i>
+			<div>
+				Публикуйте в правильной категории, указывайте точку на карте и добавляйте качественные фото.
+				<a href="{{ route('guidelines') }}" class="alert-link" target="_blank" rel="noopener">Правила публикации</a>
+			</div>
+		</div>
+
 
 		<form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" id="post-create-form">
 			@csrf
@@ -35,6 +44,16 @@
 								@enderror
 							</div>
 
+							<div class="mb-3">
+								<label for="website_url" class="form-label">Ссылка на сайт <span class="text-muted">(необязательно)</span></label>
+								<input type="url" id="website_url" name="website_url" class="form-control @error('website_url') is-invalid @enderror" 
+									   placeholder="https://example.com" value="{{ old('website_url') }}">
+								<div class="form-text">Укажите ссылку на официальный сайт места или дополнительную информацию</div>
+								@error('website_url')
+									<div class="invalid-feedback">{{ $message }}</div>
+								@enderror
+							</div>
+
 							<div class="row g-3">
 								<div class="col-md-6">
 									<label for="category_id" class="form-label">Категория</label>
@@ -47,8 +66,12 @@
 									@error('category_id')
 										<div class="invalid-feedback">{{ $message }}</div>
 									@enderror
+						<small class="form-text text-muted">
+							Достопримечательности — природные/культурные объекты (🌄), Места отдыха — размещение/питание/зоны отдыха (🏨).
+							<a href="{{ route('guidelines') }}" target="_blank" rel="noopener">Подробнее</a>
+						</small>
 								</div>
-								<div class="col-md-6">
+					<div class="col-md-6">
 									<label for="address" class="form-label">Адрес</label>
 									<div class="input-group">
 										<input type="text" id="address" name="address" class="form-control @error('address') is-invalid @enderror" value="{{ old('address') }}" placeholder="Начните вводить адрес...">
@@ -67,6 +90,17 @@
 										<div class="invalid-feedback d-block">{{ $message }}</div>
 									@enderror
 									<div id="geocode-status" class="small mt-1"></div>
+
+						<div class="row g-2 mt-2">
+							<div class="col-6">
+								<label for="latitude_input" class="form-label small text-muted mb-0">Широта</label>
+								<input type="number" step="0.00000001" min="-90" max="90" id="latitude_input" class="form-control" placeholder="61.78700000">
+							</div>
+							<div class="col-6">
+								<label for="longitude_input" class="form-label small text-muted mb-0">Долгота</label>
+								<input type="number" step="0.00000001" min="-180" max="180" id="longitude_input" class="form-control" placeholder="34.36400000">
+							</div>
+						</div>
 								</div>
 							</div>
 						</div>
@@ -177,6 +211,58 @@
 				document.getElementById('post-create-form').addEventListener('submit', function(){
 					el.value = quill.root.innerHTML;
 				});
+
+				// Autosave draft to localStorage
+				const DRAFT_KEY = 'post_create_draft';
+				function saveDraft() {
+					const data = {
+						title: document.getElementById('title')?.value || '',
+						description: quill.root.innerHTML || '',
+						category_id: document.getElementById('category_id')?.value || '',
+						address: document.getElementById('address')?.value || '',
+						website_url: document.getElementById('website_url')?.value || '',
+						latitude: document.getElementById('latitude')?.value || '',
+						longitude: document.getElementById('longitude')?.value || ''
+					};
+					try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch (_) {}
+				}
+				function loadDraft() {
+					try {
+						const raw = localStorage.getItem(DRAFT_KEY);
+						if (!raw) return;
+						const d = JSON.parse(raw);
+						if (d.title) document.getElementById('title').value = d.title;
+						if (d.description) { quill.root.innerHTML = d.description; el.value = d.description; }
+						if (d.category_id) document.getElementById('category_id').value = d.category_id;
+						if (d.address) document.getElementById('address').value = d.address;
+						if (d.website_url) document.getElementById('website_url').value = d.website_url;
+						if (d.latitude && d.longitude) {
+							document.getElementById('latitude').value = d.latitude;
+							document.getElementById('longitude').value = d.longitude;
+							const latIn = document.getElementById('latitude_input');
+							const lngIn = document.getElementById('longitude_input');
+							if (latIn) latIn.value = d.latitude;
+							if (lngIn) lngIn.value = d.longitude;
+							if (typeof updateMapCenter === 'function') {
+								updateMapCenter([parseFloat(d.latitude), parseFloat(d.longitude)]);
+							}
+						}
+					} catch (_) {}
+				}
+				// Bind events for autosave
+				['title','category_id','address','website_url','latitude','longitude'].forEach(id => {
+					const elx = document.getElementById(id);
+					if (elx) elx.addEventListener('input', saveDraft);
+				});
+				const latManual = document.getElementById('latitude_input');
+				const lngManual = document.getElementById('longitude_input');
+				if (latManual) latManual.addEventListener('input', saveDraft);
+				if (lngManual) lngManual.addEventListener('input', saveDraft);
+				quill.on('text-change', saveDraft);
+				window.addEventListener('load', loadDraft);
+				document.getElementById('post-create-form').addEventListener('submit', function(){
+					try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
+				});
 			})();
 
 			// Yandex Maps: geocode by address + draggable marker -> lat/lng
@@ -259,6 +345,10 @@
 			function setLatLng(coords){
 				document.getElementById('latitude').value = coords[0].toFixed(8);
 				document.getElementById('longitude').value = coords[1].toFixed(8);
+				const latInput = document.getElementById('latitude_input');
+				const lngInput = document.getElementById('longitude_input');
+				if (latInput) latInput.value = coords[0].toFixed(8);
+				if (lngInput) lngInput.value = coords[1].toFixed(8);
 			}
 
 			function updateMapCenter(coords) {
@@ -346,6 +436,30 @@
 
 			// Загружаем API Яндекс.Карт и инициализируем карту
 			loadYandexMapsAPI();
+
+			// Двусторонняя связь: ручной ввод -> карта
+			(function(){
+				const latInput = document.getElementById('latitude_input');
+				const lngInput = document.getElementById('longitude_input');
+				function normalizeCoordInput(inputEl, min, max) {
+					let v = (inputEl.value || '').toString().replace(',', '.').trim();
+					v = v.replace(/[^0-9.\-]/g, '');
+					const n = parseFloat(v);
+					if (!isFinite(n)) return null;
+					const clamped = Math.min(max, Math.max(min, n));
+					inputEl.value = clamped.toFixed(8);
+					return clamped;
+				}
+				function applyManualCoords(){
+					const lat = normalizeCoordInput(latInput, -90, 90);
+					const lng = normalizeCoordInput(lngInput, -180, 180);
+					if (isFinite(lat) && isFinite(lng)) {
+						updateMapCenter([lat, lng]);
+					}
+				}
+				if (latInput) { latInput.addEventListener('change', applyManualCoords); latInput.addEventListener('blur', applyManualCoords); }
+				if (lngInput) { lngInput.addEventListener('change', applyManualCoords); lngInput.addEventListener('blur', applyManualCoords); }
+			})();
 
 			// Обработчик отправки формы - переносим файлы из PhotoPreview в форму
 			document.getElementById('post-create-form').addEventListener('submit', function(e) {
@@ -443,7 +557,7 @@
 					input: input,
 					preview: preview,
 					mainIndexInput: mainIndex,
-					maxFiles: 10,
+						maxFiles: 20,
 					maxFileSize: 5 * 1024 * 1024, // 5MB
 					allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 				});

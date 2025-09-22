@@ -9,23 +9,51 @@
 		<!-- Hero Section -->
 		<div class="row align-items-center mb-5">
 			<div class="col-lg-7 mb-4 mb-lg-0">
-				<h1 class="display-5 fw-bold mb-3">
+				<h1 class="display-5 fw-bold mb-3" style="white-space: nowrap;">
 					<i class="fas fa-mountain text-primary me-2"></i>
-					Открой Карелию вместе с нами
+					Открой Карелию вместе с&nbsp;нами
 				</h1>
 				<p class="lead text-muted mb-4">
 					Маршруты, достопримечательности и лучшие места отдыха. Реальные отзывы, фото и удобная карта с метками.
 				</p>
-				<div class="d-flex flex-wrap gap-2">
-					<a href="{{ route('posts.index', ['category' => 'dostoprimechatelnosti']) }}" class="btn btn-primary">
+				<div class="d-flex flex-wrap gap-2 mb-3">
+					<a href="{{ route('posts.index', ['category' => 'dostoprimechatelnosti']) }}" class="btn btn-success">
 						<i class="fas fa-landmark me-2"></i>Достопримечательности
 					</a>
-					<a href="{{ route('posts.index', ['category' => 'mesta-otdykha']) }}" class="btn btn-outline-primary">
+					<a href="{{ route('posts.index', ['category' => 'mesta-otdykha']) }}" class="btn btn-primary">
 						<i class="fas fa-campground me-2"></i>Места отдыха
 					</a>
 					<a href="{{ route('posts.index') }}" class="btn btn-outline-secondary">
 						<i class="fas fa-list me-2"></i>Все посты
 					</a>
+				</div>
+				
+				<!-- Описания категорий -->
+				<div class="row g-3">
+					<div class="col-md-6">
+						<div class="card border-success h-100">
+							<div class="card-body">
+								<h6 class="card-title text-success mb-2">
+									<i class="fas fa-landmark me-2"></i>Достопримечательности
+								</h6>
+								<p class="card-text small text-muted mb-0">
+									Уникальные природные и рукотворные объекты, представляющие культурную, историческую или природную ценность. Места, которые стоит посетить для знакомства с наследием и красотой Карелии.
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="card border-primary h-100">
+							<div class="card-body">
+								<h6 class="card-title text-primary mb-2">
+									<i class="fas fa-campground me-2"></i>Места отдыха
+								</h6>
+								<p class="card-text small text-muted mb-0">
+									Объекты инфраструктуры и локации, созданные для комфортного проведения досуга. Места, где можно остановиться, отдохнуть и получить услуги для полноценного отдыха в Карелии.
+								</p>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="col-lg-5">

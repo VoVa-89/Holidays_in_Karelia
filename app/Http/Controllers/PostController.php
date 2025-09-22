@@ -38,8 +38,7 @@ final class PostController extends Controller
     public function index(Request $request): View
     {
         $query = Post::with(['user', 'category', 'photos'])
-            ->where('status', 'published')
-            ->orderBy('created_at', 'desc');
+            ->where('status', 'published');
 
         // Фильтрация по категории (поддержка id или slug)
         if ($request->filled('category')) {
@@ -64,7 +63,16 @@ final class PostController extends Controller
         $sortDirection = $request->get('direction', 'desc');
 
         if (in_array($sortBy, ['title', 'rating', 'views', 'created_at'])) {
-            $query->orderBy($sortBy, $sortDirection);
+            if ($sortBy === 'rating') {
+                // Для рейтинга заменяем NULL на 0 и сортируем по убыванию
+                $query->orderByRaw('COALESCE(rating, 0) DESC')
+                      ->orderBy('created_at', 'desc');
+            } else {
+                $query->orderBy($sortBy, $sortDirection);
+            }
+        } else {
+            // Сортировка по умолчанию
+            $query->orderBy('created_at', 'desc');
         }
 
         $posts = $query->paginate(4)->withQueryString();
@@ -109,6 +117,7 @@ final class PostController extends Controller
             'address' => 'required|string|max:255',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
+            'website_url' => 'nullable|url|max:255',
             'status' => 'in:' . implode(',', Post::STATUSES),
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -245,6 +254,7 @@ final class PostController extends Controller
             'address' => 'required|string|max:255',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
+            'website_url' => 'nullable|url|max:255',
             'status' => 'in:' . implode(',', Post::STATUSES),
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',

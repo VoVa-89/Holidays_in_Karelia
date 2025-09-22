@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyPostsController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Аутентификация
 Auth::routes();
+
+// Статическая страница: Правила публикации
+Route::view('/guidelines', 'pages.guidelines')->name('guidelines');
 
 // Маршруты для постов
 Route::prefix('posts')->name('posts.')->group(function () {
@@ -48,6 +52,18 @@ Route::prefix('posts')->name('posts.')->group(function () {
 // Маршруты для управления постами пользователя
 Route::middleware('auth')->prefix('my-posts')->name('my-posts.')->group(function () {
     Route::get('/', [MyPostsController::class, 'index'])->name('index');
+});
+
+// Маршруты для профиля пользователя
+Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show');
+    Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+    Route::put('/', [ProfileController::class, 'update'])->name('update');
+    Route::get('/password', [ProfileController::class, 'editPassword'])->name('password');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
+    Route::get('/settings', [ProfileController::class, 'settings'])->name('settings');
+    Route::put('/settings', [ProfileController::class, 'updateSettings'])->name('settings.update');
+    Route::delete('/delete', [ProfileController::class, 'deleteAccount'])->name('delete');
 });
 
 // Маршруты для категорий
@@ -87,6 +103,12 @@ Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->gro
     Route::get('/moderation', [AdminController::class, 'moderation'])->name('moderation');
     Route::post('/posts/{id}/approve', [AdminController::class, 'approvePost'])->name('posts.approve');
     Route::post('/posts/{id}/reject', [AdminController::class, 'rejectPost'])->name('posts.reject');
+
+    // Управление пользователями (только для супер-администраторов)
+    Route::middleware('superadmin')->group(function () {
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole'])->name('users.update-role');
+    });
 });
 
 // Дополнительные маршруты для совместимости

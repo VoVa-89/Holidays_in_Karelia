@@ -22,7 +22,17 @@
             <small>Не удалось загрузить интерактивную карту. Вы можете указать координаты вручную или попробовать позже.</small>
         </div>
         
-        <div class="small text-muted mt-2">Перетащите метку для уточнения координат.</div>
+        <div class="small text-muted mt-2">Перетащите метку для уточнения координат или введите координаты вручную ниже.</div>
+        <div class="row g-2 mt-2">
+            <div class="col-6">
+                <label for="latitude_input_edit_{{ $post->id }}" class="form-label small text-muted mb-0">Широта</label>
+                <input type="number" step="0.00000001" min="-90" max="90" id="latitude_input_edit_{{ $post->id }}" class="form-control" placeholder="61.78700000" value="{{ old('latitude', $post->latitude) }}">
+            </div>
+            <div class="col-6">
+                <label for="longitude_input_edit_{{ $post->id }}" class="form-label small text-muted mb-0">Долгота</label>
+                <input type="number" step="0.00000001" min="-180" max="180" id="longitude_input_edit_{{ $post->id }}" class="form-control" placeholder="34.36400000" value="{{ old('longitude', $post->longitude) }}">
+            </div>
+        </div>
     </div>
 </div>
 
@@ -119,6 +129,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         const coords = marker.geometry.getCoordinates();
                         document.getElementById('latitude').value = coords[0].toFixed(8);
                         document.getElementById('longitude').value = coords[1].toFixed(8);
+                        const latInput = document.getElementById('latitude_input_edit_{{ $post->id }}');
+                        const lngInput = document.getElementById('longitude_input_edit_{{ $post->id }}');
+                        if (latInput) latInput.value = coords[0].toFixed(8);
+                        if (lngInput) lngInput.value = coords[1].toFixed(8);
                         console.log('📍 Координаты обновлены:', coords[0].toFixed(8), coords[1].toFixed(8));
                     });
                     
@@ -127,9 +141,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (editMap{{ $post->id }} && marker) {
                             editMap{{ $post->id }}.setCenter(coords, 14);
                             marker.geometry.setCoordinates(coords);
+                            const latInput = document.getElementById('latitude_input_edit_{{ $post->id }}');
+                            const lngInput = document.getElementById('longitude_input_edit_{{ $post->id }}');
+                            if (latInput) latInput.value = coords[0].toFixed(8);
+                            if (lngInput) lngInput.value = coords[1].toFixed(8);
                             console.log('🗺️ Карта обновлена по геокодированию:', coords);
                         }
                     };
+
+                    // Ручной ввод -> обновление карты
+                    (function(){
+                        const latInput = document.getElementById('latitude_input_edit_{{ $post->id }}');
+                        const lngInput = document.getElementById('longitude_input_edit_{{ $post->id }}');
+                        function normalizeCoordInput(inputEl, min, max) {
+                            let v = (inputEl.value || '').toString().replace(',', '.').trim();
+                            v = v.replace(/[^0-9.\-]/g, '');
+                            const n = parseFloat(v);
+                            if (!isFinite(n)) return null;
+                            const clamped = Math.min(max, Math.max(min, n));
+                            inputEl.value = clamped.toFixed(8);
+                            return clamped;
+                        }
+                        function applyManualCoords(){
+                            const lat = normalizeCoordInput(latInput, -90, 90);
+                            const lng = normalizeCoordInput(lngInput, -180, 180);
+                            if (isFinite(lat) && isFinite(lng)) {
+                                editMap{{ $post->id }}.setCenter([lat, lng], 14);
+                                marker.geometry.setCoordinates([lat, lng]);
+                                document.getElementById('latitude').value = lat.toFixed(8);
+                                document.getElementById('longitude').value = lng.toFixed(8);
+                            }
+                        }
+                        if (latInput) { latInput.addEventListener('change', applyManualCoords); latInput.addEventListener('blur', applyManualCoords); }
+                        if (lngInput) { lngInput.addEventListener('change', applyManualCoords); lngInput.addEventListener('blur', applyManualCoords); }
+                    })();
                     
                 } catch (error) {
                     console.error('Ошибка создания карты редактирования:', error);
