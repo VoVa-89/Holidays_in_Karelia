@@ -5,14 +5,21 @@
 
 @section('content')
 	<div class="container my-4">
-		<h1 class="h3 mb-3"><i class="fas fa-plus text-primary me-2"></i>Создание поста</h1>
+		<div class="form-header">
+			<h1 class="form-title">
+				<i class="fas fa-plus me-2"></i>Создание поста
+			</h1>
+			<p class="form-subtitle">Поделитесь красивым местом Карелии с другими путешественниками</p>
+		</div>
 
 		<!-- Краткие правила публикации -->
-		<div class="alert alert-info d-flex align-items-center" role="alert">
-			<i class="fas fa-info-circle me-2"></i>
-			<div>
-				Публикуйте в правильной категории, указывайте точку на карте и добавляйте качественные фото.
-				<a href="{{ route('guidelines') }}" class="alert-link" target="_blank" rel="noopener">Правила публикации</a>
+		<div class="form-alert">
+			<div class="alert-content">
+				<i class="fas fa-info-circle me-2"></i>
+				<div>
+					<strong>Правила публикации:</strong> выберите правильную категорию, укажите точку на карте и добавьте качественные фото.
+					<a href="{{ route('guidelines') }}" class="alert-link" target="_blank" rel="noopener">Подробные правила</a>
+				</div>
 			</div>
 		</div>
 
@@ -26,11 +33,16 @@
 
 			<div class="row g-4">
 				<div class="col-lg-8">
-					<div class="card mb-4">
-						<div class="card-body">
-							<div class="mb-3">
-								<label for="title" class="form-label">Название</label>
-								<input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" value="{{ old('title') }}" placeholder="Например: Остров Кижи">
+					<div class="form-card">
+						<div class="form-card-body">
+							<div class="form-group">
+								<label for="title" class="form-label">
+									<i class="fas fa-heading me-1"></i>Название места
+								</label>
+								<input type="text" class="form-control form-control-lg @error('title') is-invalid @enderror" 
+									   id="title" name="title" value="{{ old('title') }}" 
+									   placeholder="Например: Остров Кижи, Водопад Кивач, Гора Сампо">
+								<div class="form-text">Укажите точное и понятное название места</div>
 								@error('title')
 									<div class="invalid-feedback">{{ $message }}</div>
 								@enderror

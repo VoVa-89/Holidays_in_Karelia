@@ -4,50 +4,91 @@
 @section('description', Str::limit(strip_tags($post->description), 150))
 
 @section('content')
+	<!-- Hero Section -->
+	<div class="post-hero">
+		@php $mainPhoto = $post->getMainPhoto(); @endphp
+		@if($mainPhoto)
+			@php $mainPhotoIndex = $post->photos->search(function($photo) use ($mainPhoto) { return $photo->id === $mainPhoto->id; }); @endphp
+			<div class="hero-image" style="background-image: url('{{ asset($mainPhoto->photo_path) }}');">
+				<div class="hero-overlay">
+					<div class="container">
+						<div class="row">
+							<div class="col-lg-8">
+								<div class="hero-content">
+									<div class="hero-badges">
+										<span class="hero-badge cat-{{ $post->category->slug }}">
+											<i class="fas fa-tag me-1"></i>{{ $post->category->name }}
+										</span>
+										@if($post->rating > 0)
+											<span class="hero-badge rating">
+												<i class="fas fa-star me-1"></i>{{ number_format($post->rating, 1) }}
+											</span>
+										@endif
+									</div>
+									<h1 class="hero-title">{{ $post->title }}</h1>
+									<div class="hero-meta">
+										<div class="hero-author">
+											<i class="fas fa-user me-1"></i>{{ $post->user->name }}
+											<span class="mx-2">•</span>
+											<i class="fas fa-calendar me-1"></i>{{ $post->created_at->format('d.m.Y') }}
+										</div>
+										<div class="hero-stats">
+											<span><i class="fas fa-eye me-1"></i>{{ $post->views_count }}</span>
+											<span><i class="fas fa-comments me-1"></i>{{ $post->comments_count }}</span>
+											<span><i class="fas fa-star me-1"></i>{{ $post->ratings_count }}</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		@else
+			<div class="hero-image hero-placeholder">
+				<div class="hero-overlay">
+					<div class="container">
+						<div class="row">
+							<div class="col-lg-8">
+								<div class="hero-content">
+									<div class="hero-badges">
+										<span class="hero-badge cat-{{ $post->category->slug }}">
+											<i class="fas fa-tag me-1"></i>{{ $post->category->name }}
+										</span>
+									</div>
+									<h1 class="hero-title">{{ $post->title }}</h1>
+									<div class="hero-meta">
+										<div class="hero-author">
+											<i class="fas fa-user me-1"></i>{{ $post->user->name }}
+											<span class="mx-2">•</span>
+											<i class="fas fa-calendar me-1"></i>{{ $post->created_at->format('d.m.Y') }}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		@endif
+	</div>
+
 	<div class="container my-4">
 		<div class="row g-4">
 			<div class="col-lg-8">
 				<div class="card mb-4">
-					@php $mainPhoto = $post->getMainPhoto(); @endphp
-					@if($mainPhoto)
-						@php $mainPhotoIndex = $post->photos->search(function($photo) use ($mainPhoto) { return $photo->id === $mainPhoto->id; }); @endphp
-						<img src="{{ asset($mainPhoto->photo_path) }}" 
-							 class="card-img-top gallery-thumbnail" 
-							 alt="{{ $post->title }}" 
-							 style="max-height:480px;object-fit:cover;cursor:pointer" 
-							 data-gallery-index="{{ $mainPhotoIndex }}"
-							 data-gallery-src="{{ asset($mainPhoto->photo_path) }}"
-							 data-gallery-alt="{{ $post->title }}">
-					@else
-						<img src="https://placehold.co/1200x480?text=Karelia" class="card-img-top" alt="{{ $post->title }}">
-					@endif
 					<div class="card-body">
-						<div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
-							<div>
-								<h1 class="h3 mb-1">{{ $post->title }}</h1>
-								<div class="text-muted small">
-									<i class="fas fa-user me-1"></i>{{ $post->user->name }}
-									<span class="mx-2">•</span>
-									<i class="far fa-clock me-1"></i>{{ $post->created_at->format('d.m.Y') }}
-									<span class="mx-2">•</span>
-									<i class="fas fa-folder me-1"></i>
-									<a href="{{ route('categories.show', $post->category->slug) }}" class="text-decoration-none">{{ $post->category->name }}</a>
-								</div>
-							</div>
-							<div class="rating-display">
-								@for($i=1; $i<=5; $i++)
-									<i class="{{ $i <= round($post->rating) ? 'fas' : 'far' }} fa-star {{ $i <= round($post->rating) ? 'text-warning' : 'text-muted' }} fa-lg"></i>
-								@endfor
-								<small class="ms-1 text-muted align-middle">{{ number_format((float)$post->rating, 1, '.', '') }}</small>
-							</div>
-						</div>
+						<!-- Описание поста -->
 
 						@if($post->address)
-							<p class="mb-2"><i class="fas fa-map-marker-alt text-primary me-2"></i>{{ $post->address }}</p>
+							<div class="post-location mb-4">
+								<i class="fas fa-map-marker-alt text-primary me-2"></i>
+								<span class="fw-medium">{{ $post->address }}</span>
+							</div>
 						@endif
 
-						<div class="content">
-							{{ strip_tags($post->description) }}
+						<div class="post-content">
+							{!! $post->description !!}
 						</div>
 
 						@if($post->website_url)
