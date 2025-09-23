@@ -142,7 +142,7 @@
 				@else
 					<!-- Кнопка создания поста -->
 					<li class="nav-item">
-						<a class="nav-link {{ request()->routeIs('posts.create') ? 'active' : '' }}" 
+						<a class="btn btn-cta {{ request()->routeIs('posts.create') ? 'active' : '' }}" 
 						   href="{{ route('posts.create') }}">
 							<i class="fas fa-plus me-1"></i>Создать пост
 						</a>

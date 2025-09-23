@@ -17,7 +17,7 @@
 		
 		<!-- Категория (бейдж поверх изображения) -->
 		<div class="position-absolute top-0 start-0 m-2">
-			<span class="badge bg-primary">
+			<span class="post-card-badge cat-{{ $post->category->slug }}">
 				<i class="fas fa-tag me-1"></i>{{ $post->category->name }}
 			</span>
 		</div>
@@ -25,7 +25,7 @@
 		<!-- Рейтинг (бейдж поверх изображения) -->
 		@if($post->rating > 0)
 			<div class="position-absolute top-0 end-0 m-2">
-				<span class="badge bg-warning text-dark">
+				<span class="badge" style="background: var(--k-gold); color: #fff; box-shadow: var(--k-shadow-sm);">
 					<i class="fas fa-star me-1"></i>{{ number_format($post->rating, 1) }}
 				</span>
 			</div>
