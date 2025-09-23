@@ -283,6 +283,43 @@ body {
     cursor: pointer;
 }
 
+/* ===== ПАГИНАЦИЯ ===== */
+.pagination {
+    --bs-pagination-color: var(--k-water);
+    --bs-pagination-bg: var(--bg-white);
+    --bs-pagination-border-color: var(--border-color);
+    --bs-pagination-hover-color: var(--k-forest);
+    --bs-pagination-hover-bg: rgba(45, 80, 22, 0.08);
+    --bs-pagination-hover-border-color: var(--k-forest);
+    --bs-pagination-focus-color: var(--k-forest);
+    --bs-pagination-focus-bg: rgba(45, 80, 22, 0.12);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.2rem rgba(45, 80, 22, 0.25);
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-active-bg: var(--k-water);
+    --bs-pagination-active-border-color: var(--k-water);
+    --bs-pagination-disabled-color: var(--k-text-light);
+    --bs-pagination-disabled-bg: var(--bg-white);
+    --bs-pagination-disabled-border-color: var(--border-color);
+}
+
+.page-link {
+    border-radius: var(--k-radius);
+    margin: 0 2px;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.page-link:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--k-shadow-sm);
+}
+
+.page-item.active .page-link {
+    background: var(--k-gradient-water);
+    border-color: var(--k-water);
+    box-shadow: var(--k-shadow-sm);
+}
+
 /* ===== КНОПКИ ===== */
 .btn {
     display: inline-flex;
