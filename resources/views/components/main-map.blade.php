@@ -45,13 +45,80 @@
             </div>
         </noscript>
         
-        <div class="small text-muted mt-2">
-            <i class="fas fa-info-circle me-1"></i>
-            @if($posts->count() > 0)
-                Показано {{ $posts->count() }} мест. Кликните на метку для подробной информации.
-            @else
-                Карта готова к отображению новых мест. <a href="{{ route('posts.create') }}" class="text-decoration-none">Добавьте первое место!</a>
-            @endif
+        <!-- Подсказка для пользователей -->
+        <div class="mt-4 mb-0" style="
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        ">
+            <div class="d-flex align-items-start">
+                <div class="me-3" style="
+                    background: rgba(13, 202, 240, 0.15);
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <i class="fas fa-mouse-pointer text-info" style="font-size: 1.1rem;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="mb-3 text-dark fw-semibold">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Как пользоваться картой
+                    </h6>
+                    @if($posts->count() > 0)
+                        <p class="mb-3 text-dark">
+                            <strong>Показано {{ $posts->count() }} интересных мест</strong> в Карелии. 
+                            <span class="text-primary fw-semibold">Кликните на любую метку</span> на карте, чтобы:
+                        </p>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-book-open text-success me-2"></i>
+                                    <span class="small"><strong>Прочитать описание</strong> места</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-star text-warning me-2"></i>
+                                    <span class="small"><strong>Узнать рейтинг</strong> и отзывы</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-external-link-alt text-primary me-2"></i>
+                                    <span class="small"><strong>Перейти к полной странице</strong> места</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap gap-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                <span class="small text-success fw-semibold">Зеленые метки</span>
+                                <span class="small text-muted ms-1">— достопримечательности</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                <span class="small text-primary fw-semibold">Синие метки</span>
+                                <span class="small text-muted ms-1">— места отдыха</span>
+                            </div>
+                        </div>
+                    @else
+                        <p class="mb-3 text-dark">
+                            Карта готова к отображению новых мест! 
+                            <a href="{{ route('posts.create') }}" class="text-primary fw-bold text-decoration-none">Добавьте первое место</a> и оно появится на карте.
+                        </p>
+                        <p class="mb-0 small text-muted">
+                            После добавления места вы сможете кликать на метки для просмотра подробной информации.
+                        </p>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -108,7 +108,14 @@ Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->gro
     Route::middleware('superadmin')->group(function () {
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole'])->name('users.update-role');
+        Route::delete('/users/{id}/delete', [AdminController::class, 'deleteUser'])->name('users.delete');
     });
+
+    // Просмотр постов пользователя (для всех администраторов)
+    Route::get('/users/{id}/posts', [AdminController::class, 'userPosts'])->name('users.posts');
+    
+    // Просмотр списка пользователей (для всех администраторов)
+    Route::get('/users-list', [AdminController::class, 'usersList'])->name('users.list');
 });
 
 // Дополнительные маршруты для совместимости

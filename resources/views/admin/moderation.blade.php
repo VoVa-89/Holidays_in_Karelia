@@ -151,7 +151,12 @@
 								@if($post->latitude && $post->longitude)
 									<div class="mb-3">
 										<strong>Местоположение:</strong>
-										<div id="map{{ $post->id }}" style="height: 200px; border-radius: 8px; margin-top: 8px;"></div>
+										<div class="position-relative" style="margin-top: 8px;">
+											<div id="map{{ $post->id }}" style="height: 200px; border-radius: 8px;"></div>
+											<div id="mapLoading{{ $post->id }}" class="map-loading">
+												Загрузка карты...
+											</div>
+										</div>
 									</div>
 								@endif
 							</div>
@@ -252,33 +257,311 @@
 		@endif
 	</div>
 
+	@push('styles')
+		<style>
+			/* Стили для карты в модальном окне */
+			.modal-body #map{{ $post->id ?? '' }} {
+				width: 100%;
+				height: 200px;
+				border-radius: 8px;
+				border: 1px solid #dee2e6;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+			
+			/* Стили для всех карт в модальных окнах */
+			.modal-body [id^="map"] {
+				width: 100%;
+				height: 200px;
+				border-radius: 8px;
+				border: 1px solid #dee2e6;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+			
+			/* Индикатор загрузки карты */
+			.map-loading {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: rgba(248, 249, 250, 0.9);
+				border-radius: 8px;
+				color: #6c757d;
+				font-size: 14px;
+				z-index: 10;
+			}
+			
+			.map-loading::before {
+				content: '';
+				width: 20px;
+				height: 20px;
+				border: 2px solid #dee2e6;
+				border-top: 2px solid #007bff;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+				margin-right: 10px;
+			}
+			
+			@keyframes spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
+			}
+		</style>
+	@endpush
+
 	@push('scripts')
-		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
 		<script>
+			// Отладочная информация
+			console.log('🔑 Yandex Maps API Key:', '{{ config('services.yandex.maps_key') ? 'найден' : 'не найден' }}');
+			console.log('📊 Количество постов с координатами:', {{ $posts->where('latitude', '!=', null)->where('longitude', '!=', null)->count() }});
+		</script>
+		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey={{ config('services.yandex.maps_key') }}"></script>
+		<script>
+			// Глобальные переменные для карт модальных окон
+			let modalMaps = {};
+			let modalMapTimeouts = {};
+
+			// Функция показа ошибки загрузки карты
+			function showModalMapError(postId) {
+				const loadingIndicator = document.getElementById('mapLoading' + postId);
+				if (loadingIndicator) {
+					loadingIndicator.innerHTML = 'Ошибка загрузки карты';
+					loadingIndicator.style.color = '#dc3545';
+				}
+			}
+
+			// Функция скрытия лоадера и показа карты
+			function showModalMap(postId) {
+				const loadingIndicator = document.getElementById('mapLoading' + postId);
+				if (loadingIndicator) {
+					loadingIndicator.style.display = 'none';
+				}
+			}
+
+			// Функция инициализации карты в модальном окне
+			function initModalMap(postId, latitude, longitude, address, title) {
+				console.log('🚀 Инициализация карты модального окна для поста ' + postId);
+				
+				// Проверяем, не инициализирована ли уже карта для этого поста
+				if (modalMaps[postId]) {
+					console.log('⚠️ Карта для поста ' + postId + ' уже существует, пропускаем инициализацию');
+					return;
+				}
+				
+				// Проверяем контейнер
+				const container = document.getElementById('map' + postId);
+				if (!container) {
+					console.error('❌ Контейнер map' + postId + ' не найден!');
+					showModalMapError(postId);
+					return;
+				}
+				
+				// Проверяем, не содержит ли контейнер уже карту
+				if (container.children.length > 0) {
+					console.log('⚠️ Контейнер map' + postId + ' уже содержит элементы, очищаем');
+					container.innerHTML = '';
+				}
+				
+				console.log('✅ Контейнер карты модального окна найден');
+				
+				// Устанавливаем таймаут для загрузки карты (10 секунд)
+				modalMapTimeouts[postId] = setTimeout(function() {
+					console.error('⏰ Таймаут карты модального окна ' + postId);
+					showModalMapError(postId);
+				}, 10000);
+
+				// Проверяем, загружен ли API Яндекс.Карт
+				if (typeof ymaps === 'undefined') {
+					console.error('❌ API Яндекс.Карт не загружен для модального окна ' + postId);
+					showModalMapError(postId);
+					return;
+				}
+				
+				console.log('✅ API доступен для модального окна ' + postId);
+
+				try {
+					ymaps.ready(function () {
+						console.log('🗺️ ymaps.ready() для модального окна ' + postId);
+						try {
+							// Создаем карту с центром на координатах поста
+							console.log('📍 Создаем карту модального окна с координатами: ' + latitude + ', ' + longitude);
+							
+							modalMaps[postId] = new ymaps.Map('map' + postId, {
+								center: [parseFloat(latitude), parseFloat(longitude)],
+								zoom: 14,
+								controls: [
+									'zoomControl', 
+									'geolocationControl', 
+									'fullscreenControl',
+									'typeSelector'
+								]
+							});
+							
+							console.log('✅ Карта модального окна ' + postId + ' создана');
+
+							// Создаем маркер
+							const marker = new ymaps.Placemark([parseFloat(latitude), parseFloat(longitude)], {
+								balloonContent: address,
+								hintContent: title
+							}, {
+								preset: 'islands#redIcon',
+								iconColor: '#ff0000'
+							});
+							
+							modalMaps[postId].geoObjects.add(marker);
+							
+							// Открываем балун с информацией
+							marker.balloon.open();
+
+							// Обработчик успешной загрузки карты
+							modalMaps[postId].events.add('ready', function() {
+								console.log('🎉 Карта модального окна ' + postId + ' готова!');
+								clearTimeout(modalMapTimeouts[postId]);
+								showModalMap(postId);
+							});
+							
+							// Принудительный показ через 3 секунды
+							setTimeout(function() {
+								if (modalMaps[postId]) {
+									console.log('⏰ Принудительно показываем карту модального окна ' + postId);
+									clearTimeout(modalMapTimeouts[postId]);
+									showModalMap(postId);
+								}
+							}, 3000);
+							
+						} catch (error) {
+							console.error('❌ Ошибка создания карты модального окна ' + postId + ':', error);
+							clearTimeout(modalMapTimeouts[postId]);
+							showModalMapError(postId);
+						}
+					});
+				} catch (error) {
+					console.error('❌ Ошибка ymaps.ready для модального окна ' + postId + ':', error);
+					clearTimeout(modalMapTimeouts[postId]);
+					showModalMapError(postId);
+				}
+			}
+
+			// Проверка загрузки API Яндекс.Карт
+			function checkYandexMapsAPI() {
+				if (typeof ymaps !== 'undefined') {
+					console.log('✅ Yandex Maps API загружен');
+					return true;
+				} else {
+					console.log('⏳ Yandex Maps API еще загружается...');
+					return false;
+				}
+			}
+
+			// Функция инициализации карты для конкретного поста
+			function initMapForPost{{ $post->id ?? '' }}(postId, latitude, longitude, address, title) {
+				console.log('🚀 Инициализация карты для поста ' + postId);
+				
+				// Проверяем, не инициализирована ли уже карта
+				if (modalMaps[postId]) {
+					console.log('⚠️ Карта для поста ' + postId + ' уже инициализирована, пропускаем');
+					return;
+				}
+				
+				// Проверяем, загружен ли API
+				if (!checkYandexMapsAPI()) {
+					console.log('⏳ API еще не загружен, ждем...');
+					// Ждем загрузки API с интервалом
+					const checkInterval = setInterval(function() {
+						if (checkYandexMapsAPI()) {
+							clearInterval(checkInterval);
+							initModalMap(postId, latitude, longitude, address, title);
+						}
+					}, 100);
+					
+					// Таймаут для проверки API
+					setTimeout(function() {
+						clearInterval(checkInterval);
+						if (!checkYandexMapsAPI()) {
+							console.error('❌ API не загрузился за 5 секунд');
+							showModalMapError(postId);
+						}
+					}, 5000);
+				} else {
+					// API уже загружен, запускаем инициализацию
+					initModalMap(postId, latitude, longitude, address, title);
+				}
+			}
+
+			// Проверка Bootstrap
+			function checkBootstrap() {
+				if (typeof bootstrap !== 'undefined') {
+					console.log('✅ Bootstrap загружен');
+					return true;
+				} else {
+					console.log('⏳ Bootstrap еще загружается...');
+					return false;
+				}
+			}
+
 			// Инициализация карт для модальных окон
 			document.addEventListener('DOMContentLoaded', function() {
+				console.log('🚀 DOM загружен, инициализируем обработчики модальных окон');
+				console.log('🔧 Bootstrap статус:', checkBootstrap() ? 'загружен' : 'не загружен');
+				
 				@foreach($posts as $post)
 					@if($post->latitude && $post->longitude)
 						// Карта для поста {{ $post->id }}
-						$('#previewModal{{ $post->id }}').on('shown.bs.modal', function() {
-							if (typeof ymaps !== 'undefined') {
-								ymaps.ready(function() {
-									var map{{ $post->id }} = new ymaps.Map('map{{ $post->id }}', {
-										center: [{{ $post->latitude }}, {{ $post->longitude }}],
-										zoom: 14,
-										controls: ['zoomControl']
-									});
-									
-									var marker{{ $post->id }} = new ymaps.Placemark([{{ $post->latitude }}, {{ $post->longitude }}], {
-										balloonContent: '{{ $post->address }}'
-									}, {
-										preset: 'islands#redIcon'
-									});
-									
-									map{{ $post->id }}.geoObjects.add(marker{{ $post->id }});
-								});
-							}
-						});
+						const previewModal{{ $post->id }} = document.getElementById('previewModal{{ $post->id }}');
+						if (previewModal{{ $post->id }}) {
+							// Флаг для предотвращения двойной инициализации
+							let mapInitialized{{ $post->id }} = false;
+							
+							// Обработчик открытия модального окна
+							previewModal{{ $post->id }}.addEventListener('shown.bs.modal', function() {
+								console.log('📱 Открыто модальное окно для поста {{ $post->id }}');
+								
+								// Проверяем, не инициализирована ли уже карта
+								if (!mapInitialized{{ $post->id }}) {
+									mapInitialized{{ $post->id }} = true;
+									initMapForPost{{ $post->id }}({{ $post->id }}, {{ $post->latitude }}, {{ $post->longitude }}, '{{ addslashes($post->address) }}', '{{ addslashes($post->title) }}');
+								} else {
+									console.log('⚠️ Карта для поста {{ $post->id }} уже инициализирована');
+								}
+							});
+							
+							// Обработчик закрытия модального окна
+							previewModal{{ $post->id }}.addEventListener('hidden.bs.modal', function() {
+								console.log('📱 Закрыто модальное окно для поста {{ $post->id }}');
+								const mapContainer = document.getElementById('map{{ $post->id }}');
+								const loadingIndicator = document.getElementById('mapLoading{{ $post->id }}');
+								
+								// Уничтожаем карту
+								if (modalMaps[{{ $post->id }}]) {
+									modalMaps[{{ $post->id }}].destroy();
+									delete modalMaps[{{ $post->id }}];
+								}
+								
+								// Очищаем контейнер
+								if (mapContainer) {
+									mapContainer.innerHTML = '';
+								}
+								
+								// Показываем индикатор загрузки снова
+								if (loadingIndicator) {
+									loadingIndicator.style.display = 'flex';
+									loadingIndicator.innerHTML = 'Загрузка карты...';
+									loadingIndicator.style.color = '#6c757d';
+								}
+								
+								// Очищаем таймаут
+								if (modalMapTimeouts[{{ $post->id }}]) {
+									clearTimeout(modalMapTimeouts[{{ $post->id }}]);
+									delete modalMapTimeouts[{{ $post->id }}];
+								}
+								
+								// Сбрасываем флаг инициализации
+								mapInitialized{{ $post->id }} = false;
+							});
+						}
 					@endif
 				@endforeach
 			});

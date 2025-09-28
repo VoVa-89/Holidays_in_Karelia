@@ -81,11 +81,12 @@ final class ProfileController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:users,name,' . $user->id,
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
         ], [
             'name.required' => 'Имя обязательно для заполнения.',
             'name.max' => 'Имя не может быть длиннее 255 символов.',
+            'name.unique' => 'Пользователь с таким именем уже существует.',
             'email.required' => 'Email обязателен для заполнения.',
             'email.email' => 'Введите корректный email адрес.',
             'email.unique' => 'Этот email уже используется другим пользователем.',

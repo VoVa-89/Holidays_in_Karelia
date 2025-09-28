@@ -16,56 +16,6 @@
                 </a>
             </div>
 
-            <!-- Настройки уведомлений -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bell me-2"></i>Уведомления
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('profile.settings.update') }}">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" 
-                                   type="checkbox" 
-                                   id="email_notifications" 
-                                   name="email_notifications" 
-                                   value="1"
-                                   {{ old('email_notifications', $user->email_notifications ?? true) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="email_notifications">
-                                <strong>Email уведомления</strong>
-                                <p class="text-muted mb-0 small">
-                                    Получать уведомления о новых комментариях, одобрении/отклонении постов и других важных событиях
-                                </p>
-                            </label>
-                        </div>
-
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" 
-                                   type="checkbox" 
-                                   id="public_profile" 
-                                   name="public_profile" 
-                                   value="1"
-                                   {{ old('public_profile', $user->public_profile ?? false) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="public_profile">
-                                <strong>Публичный профиль</strong>
-                                <p class="text-muted mb-0 small">
-                                    Разрешить другим пользователям просматривать ваш профиль и статистику
-                                </p>
-                            </label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>Сохранить настройки
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-
             <!-- Настройки аккаунта -->
             <div class="card">
                 <div class="card-header">
@@ -139,18 +89,22 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted small">
-                        Здесь вы можете настроить различные аспекты вашего аккаунта, включая уведомления, конфиденциальность и безопасность.
+                        В этом разделе вы можете управлять безопасностью своего аккаунта, изменять пароль и выполнять другие важные действия по настройке профиля.
                     </p>
                     <hr>
-                    <h6>Текущие настройки:</h6>
+                    <h6>Доступные действия:</h6>
                     <ul class="list-unstyled small">
                         <li>
-                            <i class="fas fa-bell me-1 text-{{ $user->email_notifications ?? true ? 'success' : 'muted' }}"></i>
-                            Email уведомления: {{ $user->email_notifications ?? true ? 'Включены' : 'Отключены' }}
+                            <i class="fas fa-key me-1 text-warning"></i>
+                            <strong>Изменение пароля</strong> — обновите пароль для повышения безопасности
                         </li>
                         <li>
-                            <i class="fas fa-globe me-1 text-{{ $user->public_profile ?? false ? 'success' : 'muted' }}"></i>
-                            Публичный профиль: {{ $user->public_profile ?? false ? 'Включен' : 'Отключен' }}
+                            <i class="fas fa-user-edit me-1 text-primary"></i>
+                            <strong>Редактирование профиля</strong> — измените личную информацию
+                        </li>
+                        <li>
+                            <i class="fas fa-newspaper me-1 text-info"></i>
+                            <strong>Управление постами</strong> — просматривайте и редактируйте свои публикации
                         </li>
                     </ul>
                 </div>

@@ -239,7 +239,7 @@
 			.content {
 				white-space: pre-line;
 				word-wrap: break-word;
-				line-height: 1.6;
+				line-height: 1.4;
 				text-align: justify;
 			}
 			

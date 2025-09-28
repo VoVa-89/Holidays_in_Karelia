@@ -587,7 +587,7 @@
 
 .moderation-post-excerpt {
     color: var(--text-dark);
-    line-height: 1.6;
+    line-height: 1.4;
     margin-bottom: 12px;
 }
 
@@ -852,14 +852,3 @@
         background: var(--bg-white);
     }
 }
-
-
-
-
-
-
-
-
-
-
-

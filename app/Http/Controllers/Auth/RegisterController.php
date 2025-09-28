@@ -49,9 +49,20 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'name.required' => 'Имя обязательно для заполнения.',
+            'name.string' => 'Имя должно быть строкой.',
+            'name.max' => 'Имя не может быть длиннее 255 символов.',
+            'name.unique' => 'Пользователь с таким именем уже существует.',
+            'email.required' => 'Email обязателен для заполнения.',
+            'email.email' => 'Email должен быть действительным адресом электронной почты.',
+            'email.unique' => 'Пользователь с таким email уже существует.',
+            'password.required' => 'Пароль обязателен для заполнения.',
+            'password.min' => 'Пароль должен содержать минимум 8 символов.',
+            'password.confirmed' => 'Подтверждение пароля не совпадает.',
         ]);
     }
 

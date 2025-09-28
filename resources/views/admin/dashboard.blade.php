@@ -23,13 +23,13 @@
 
 		<!-- Статистические карточки -->
 		<div class="row g-4 mb-4">
-			<div class="col-xl-3 col-md-6">
+			<div class="col-xl-2 col-md-4 col-sm-6">
 				<div class="card bg-primary text-white">
 					<div class="card-body">
 						<div class="d-flex justify-content-between">
 							<div>
 								<h4 class="card-title">{{ $stats['total_posts'] }}</h4>
-								<p class="card-text">Всего постов</p>
+								<p class="card-text small">Всего постов</p>
 							</div>
 							<div class="align-self-center">
 								<i class="fas fa-newspaper fa-2x opacity-75"></i>
@@ -39,13 +39,13 @@
 				</div>
 			</div>
 
-			<div class="col-xl-3 col-md-6">
+			<div class="col-xl-2 col-md-4 col-sm-6">
 				<div class="card bg-success text-white">
 					<div class="card-body">
 						<div class="d-flex justify-content-between">
 							<div>
 								<h4 class="card-title">{{ $stats['published_posts'] }}</h4>
-								<p class="card-text">Опубликовано</p>
+								<p class="card-text small">Опубликовано</p>
 							</div>
 							<div class="align-self-center">
 								<i class="fas fa-check-circle fa-2x opacity-75"></i>
@@ -55,13 +55,13 @@
 				</div>
 			</div>
 
-			<div class="col-xl-3 col-md-6">
+			<div class="col-xl-2 col-md-4 col-sm-6">
 				<div class="card bg-warning text-white">
 					<div class="card-body">
 						<div class="d-flex justify-content-between">
 							<div>
 								<h4 class="card-title">{{ $stats['moderation_posts'] }}</h4>
-								<p class="card-text">На модерации</p>
+								<p class="card-text small">На модерации</p>
 							</div>
 							<div class="align-self-center">
 								<i class="fas fa-clock fa-2x opacity-75"></i>
@@ -71,16 +71,48 @@
 				</div>
 			</div>
 
-			<div class="col-xl-3 col-md-6">
+			<div class="col-xl-2 col-md-4 col-sm-6">
 				<div class="card bg-info text-white">
 					<div class="card-body">
 						<div class="d-flex justify-content-between">
 							<div>
 								<h4 class="card-title">{{ $stats['total_users'] }}</h4>
-								<p class="card-text">Пользователей</p>
+								<p class="card-text small">Пользователей</p>
 							</div>
 							<div class="align-self-center">
 								<i class="fas fa-users fa-2x opacity-75"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-2 col-md-4 col-sm-6">
+				<div class="card bg-danger text-white">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h4 class="card-title">{{ $stats['rejected_posts'] }}</h4>
+								<p class="card-text small">Отклонено</p>
+							</div>
+							<div class="align-self-center">
+								<i class="fas fa-times-circle fa-2x opacity-75"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-2 col-md-4 col-sm-6">
+				<div class="card bg-secondary text-white">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div>
+								<h4 class="card-title">{{ $stats['active_users'] }}</h4>
+								<p class="card-text small">Активных</p>
+							</div>
+							<div class="align-self-center">
+								<i class="fas fa-user-check fa-2x opacity-75"></i>
 							</div>
 						</div>
 					</div>
@@ -98,6 +130,94 @@
 					</div>
 					<div class="card-body">
 						<canvas id="activityChart" height="100"></canvas>
+					</div>
+				</div>
+
+				<!-- Активные пользователи -->
+				<div class="card mb-4">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h5 class="mb-0"><i class="fas fa-users me-2"></i>Активные пользователи</h5>
+						<a href="{{ route('admin.users.list') }}" class="btn btn-sm btn-outline-primary">Все пользователи</a>
+					</div>
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-hover mb-0">
+								<thead class="table-light">
+									<tr>
+										<th>Пользователь</th>
+										<th>Посты</th>
+										<th>Комментарии</th>
+										<th>Рейтинги</th>
+										<th>Последний пост</th>
+										<th>Действия</th>
+									</tr>
+								</thead>
+								<tbody>
+									@forelse($activeUsers as $user)
+										<tr>
+											<td>
+												<div class="d-flex align-items-center">
+													<div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+														<i class="fas fa-user text-white small"></i>
+													</div>
+													<div>
+														<strong>{{ $user->name }}</strong>
+														<br>
+														<small class="text-muted">{{ $user->email }}</small>
+													</div>
+												</div>
+											</td>
+											<td>
+												<span class="badge bg-primary">{{ $user->posts_count }}</span>
+											</td>
+											<td>
+												<span class="badge bg-info">{{ $user->comments_count }}</span>
+											</td>
+											<td>
+												<span class="badge bg-warning">{{ $user->ratings_count }}</span>
+											</td>
+											<td>
+												@if($user->posts->count() > 0)
+													<small class="text-muted">
+														{{ $user->posts->first()->created_at->diffForHumans() }}
+													</small>
+												@else
+													<small class="text-muted">Нет постов</small>
+												@endif
+											</td>
+											<td>
+												<div class="btn-group btn-group-sm">
+													<a href="{{ route('admin.users.posts', $user->id) }}" class="btn btn-outline-primary btn-sm" title="Посты пользователя">
+														<i class="fas fa-eye"></i>
+													</a>
+													@if(Auth::user()->isSuperAdmin())
+														<a href="{{ route('admin.users') }}?user={{ $user->id }}" class="btn btn-outline-warning btn-sm" title="Управление">
+															<i class="fas fa-cog"></i>
+														</a>
+														@if($user->id !== Auth::id() && $user->role !== 'superadmin')
+															<button type="button" 
+																	class="btn btn-outline-danger btn-sm" 
+																	title="Удалить пользователя"
+																	data-bs-toggle="modal" 
+																	data-bs-target="#deleteUserModal{{ $user->id }}">
+																<i class="fas fa-trash"></i>
+															</button>
+														@endif
+													@endif
+												</div>
+											</td>
+										</tr>
+									@empty
+										<tr>
+											<td colspan="6" class="text-center text-muted py-4">
+												<i class="fas fa-users fa-2x mb-2"></i><br>
+												Нет активных пользователей
+											</td>
+										</tr>
+									@endforelse
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 
@@ -243,6 +363,82 @@
 								</div>
 							</div>
 						</div>
+						<hr>
+						<div class="text-center">
+							<h4 class="text-danger mb-0">{{ number_format($stats['average_rating'], 1) }}</h4>
+							<small class="text-muted">Средний рейтинг</small>
+						</div>
+					</div>
+				</div>
+
+				<!-- Топ пользователи по рейтингам -->
+				<div class="card mb-4">
+					<div class="card-header">
+						<h5 class="mb-0"><i class="fas fa-star me-2"></i>Топ пользователи</h5>
+					</div>
+					<div class="card-body">
+						@forelse($topRatedUsers as $user)
+							<div class="d-flex justify-content-between align-items-center mb-3">
+								<div>
+									<h6 class="mb-0">{{ $user->name }}</h6>
+									<small class="text-muted">{{ $user->ratings_count }} оценок</small>
+								</div>
+								<div class="text-end">
+									<div class="d-flex align-items-center">
+										@for($i = 1; $i <= 5; $i++)
+											@if($i <= $user->ratings_avg_value)
+												<i class="fas fa-star text-warning"></i>
+											@else
+												<i class="far fa-star text-muted"></i>
+											@endif
+										@endfor
+									</div>
+									<small class="text-muted">{{ number_format($user->ratings_avg_value, 1) }}</small>
+								</div>
+							</div>
+						@empty
+							<p class="text-muted text-center">Нет данных</p>
+						@endforelse
+					</div>
+				</div>
+
+				<!-- Последние рейтинги и отзывы -->
+				<div class="card mb-4">
+					<div class="card-header">
+						<h5 class="mb-0"><i class="fas fa-star me-2"></i>Последние рейтинги</h5>
+					</div>
+					<div class="card-body">
+						@forelse($recentRatings as $rating)
+							<div class="d-flex mb-3">
+								<div class="flex-shrink-0">
+									<div class="bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+										<i class="fas fa-star text-white small"></i>
+									</div>
+								</div>
+								<div class="flex-grow-1 ms-2">
+									<div class="d-flex justify-content-between">
+										<strong class="small">{{ $rating->user->name }}</strong>
+									<div class="d-flex align-items-center">
+										@for($i = 1; $i <= 5; $i++)
+											@if($i <= $rating->value)
+												<i class="fas fa-star text-warning small"></i>
+											@else
+												<i class="far fa-star text-muted small"></i>
+											@endif
+										@endfor
+									</div>
+									</div>
+									<p class="small mb-1 text-muted">Оценка: {{ $rating->value }}/5</p>
+									<small class="text-muted">
+										К посту: <a href="{{ route('posts.show', $rating->post->slug) }}" class="text-decoration-none">
+											{{ Str::limit($rating->post->title, 20) }}
+										</a>
+									</small>
+								</div>
+							</div>
+						@empty
+							<p class="text-muted text-center">Нет рейтингов</p>
+						@endforelse
 					</div>
 				</div>
 
@@ -341,4 +537,50 @@
 			});
 		</script>
 	@endpush
+
+	<!-- Модальные окна подтверждения удаления -->
+	@foreach($activeUsers as $user)
+		@if(Auth::user()->isSuperAdmin() && $user->id !== Auth::id() && $user->role !== 'superadmin')
+			<div class="modal fade" id="deleteUserModal{{ $user->id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ $user->id }}" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header bg-danger text-white">
+							<h5 class="modal-title" id="deleteUserModalLabel{{ $user->id }}">
+								<i class="fas fa-exclamation-triangle me-2"></i>Удаление пользователя
+							</h5>
+							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+						</div>
+						<div class="modal-body">
+							<div class="alert alert-warning">
+								<i class="fas fa-exclamation-triangle me-2"></i>
+								<strong>Внимание!</strong> Это действие необратимо.
+							</div>
+							<p>Вы действительно хотите удалить пользователя <strong>{{ $user->name }}</strong>?</p>
+							<p class="text-muted small">
+								При удалении пользователя будут также удалены:
+							</p>
+							<ul class="text-muted small">
+								<li>Все посты пользователя ({{ $user->posts->count() }})</li>
+								<li>Все комментарии пользователя</li>
+								<li>Все рейтинги пользователя</li>
+								<li>Все фотографии пользователя</li>
+							</ul>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+								<i class="fas fa-times me-2"></i>Отмена
+							</button>
+							<form method="POST" action="{{ route('admin.users.delete', $user->id) }}" class="d-inline">
+								@csrf
+								@method('DELETE')
+								<button type="submit" class="btn btn-danger">
+									<i class="fas fa-trash me-2"></i>Удалить пользователя
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		@endif
+	@endforeach
 @endsection
