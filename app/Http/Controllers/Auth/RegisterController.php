@@ -7,6 +7,11 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\URL;
 
 class RegisterController extends Controller
 {
@@ -38,6 +43,10 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+        // DEV: смягчаем лимит для локальной разработки
+        $this->middleware('throttle:30,1')->only(['showRegistrationForm', 'register']);
+        // Honeypot для защиты от ботов на регистрации
+        $this->middleware('honeypot')->only(['register']);
     }
 
     /**
@@ -74,10 +83,55 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+        // Логируем регистрацию и запускаем событие (триггер отправки письма)
+        Log::info('User registered', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'ip' => request()->ip(),
+            'user_agent' => request()->header('User-Agent'),
+        ]);
+        // Отправка письма верификации (в локалке уходит в лог). Не роняем регистрацию при ошибках SMTP
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            Log::warning('Email verification dispatch failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
+        return $user;
+    }
+
+    /**
+     * После регистрации перенаправляем на страницу подтверждения email
+     */
+    protected function registered(Request $request, $user)
+    {
+        // Если email не подтвержден — показать уведомление о подтверждении
+        if (method_exists($user, 'hasVerifiedEmail') && !$user->hasVerifiedEmail()) {
+            // В локальной среде генерируем и передаем в сессию HTTP-ссылку для удобной верификации
+            if (App::environment('local')) {
+                $verificationUrl = URL::temporarySignedRoute(
+                    'verification.verify',
+                    now()->addMinutes(120),
+                    [
+                        'id' => $user->getKey(),
+                        'hash' => sha1($user->getEmailForVerification()),
+                    ]
+                );
+                session()->flash('dev_verification_url', $verificationUrl);
+                Log::info('Dev verification URL', ['url' => $verificationUrl, 'user_id' => $user->id]);
+            }
+            return redirect()->route('verification.notice');
+        }
+
+        // Иначе — стандартный редирект
+        return redirect($this->redirectTo);
     }
 }

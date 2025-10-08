@@ -87,20 +87,7 @@
                         Ваш надежный гид по красотам Карелии. Откройте для себя удивительные места, 
                         маршруты и достопримечательности этого прекрасного края.
                     </p>
-                    <div class="social-links">
-                        <a href="#" class="text-light me-3" title="ВКонтакте">
-                            <i class="fab fa-vk fa-lg"></i>
-                        </a>
-                        <a href="#" class="text-light me-3" title="Telegram">
-                            <i class="fab fa-telegram fa-lg"></i>
-                        </a>
-                        <a href="#" class="text-light me-3" title="Instagram">
-                            <i class="fab fa-instagram fa-lg"></i>
-                        </a>
-                        <a href="#" class="text-light" title="YouTube">
-                            <i class="fab fa-youtube fa-lg"></i>
-                        </a>
-                    </div>
+					{{-- Социальные иконки скрыты по требованию — блок удален --}}
                 </div>
                 <div class="col-md-3">
                     <h6 class="fw-bold mb-3">Навигация</h6>

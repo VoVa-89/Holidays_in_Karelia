@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'check.admin' => \App\Http\Middleware\CheckAdmin::class,
         'superadmin' => \App\Http\Middleware\CheckSuperAdmin::class,
+        'honeypot' => \App\Http\Middleware\Honeypot::class,
     ];
 }

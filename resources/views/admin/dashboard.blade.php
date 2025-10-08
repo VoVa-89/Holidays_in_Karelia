@@ -13,6 +13,9 @@
 						<a href="{{ route('admin.moderation') }}" class="btn btn-outline-primary">
 							<i class="fas fa-clipboard-check me-2"></i>Модерация
 						</a>
+						<a href="{{ route('admin.logs') }}" class="btn btn-outline-secondary">
+							<i class="fas fa-file-alt me-2"></i>Логи
+						</a>
 						<a href="{{ route('posts.create') }}" class="btn btn-primary">
 							<i class="fas fa-plus me-2"></i>Создать пост
 						</a>
@@ -212,6 +215,109 @@
 											<td colspan="6" class="text-center text-muted py-4">
 												<i class="fas fa-users fa-2x mb-2"></i><br>
 												Нет активных пользователей
+											</td>
+										</tr>
+									@endforelse
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- Временные аккаунты -->
+				<div class="card mb-4">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h5 class="mb-0"><i class="fas fa-user-clock me-2"></i>Временные аккаунты</h5>
+						<span class="badge bg-warning">{{ $tempUsers->count() }} неверифицированных</span>
+					</div>
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-hover mb-0">
+								<thead class="table-light">
+									<tr>
+										<th>Пользователь</th>
+										<th>Дата регистрации</th>
+										<th>Дней с регистрации</th>
+										<th>Время до удаления</th>
+										<th>Статус</th>
+										<th>Действия</th>
+									</tr>
+								</thead>
+								<tbody>
+									@forelse($tempUsers as $tempUser)
+										<tr class="{{ $tempUser->is_expired ? 'table-danger' : '' }}">
+											<td>
+												<div class="d-flex align-items-center">
+													<div class="bg-warning rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+														<i class="fas fa-user-clock text-white small"></i>
+													</div>
+													<div>
+														<strong>{{ $tempUser->name }}</strong>
+														<br>
+														<small class="text-muted">{{ $tempUser->email }}</small>
+													</div>
+												</div>
+											</td>
+											<td>
+												<small class="text-muted">
+													{{ $tempUser->created_at->format('d.m.Y H:i') }}
+												</small>
+											</td>
+											<td>
+												<span class="badge bg-secondary">{{ $tempUser->days_since_registration }} дн.</span>
+											</td>
+											<td>
+												@if($tempUser->is_expired)
+													<span class="badge bg-danger">Просрочен</span>
+												@elseif($tempUser->days_until_deletion <= 1)
+													<span class="badge bg-warning">{{ $tempUser->days_until_deletion }} дн.</span>
+												@else
+													<span class="badge bg-info">{{ $tempUser->days_until_deletion }} дн.</span>
+												@endif
+											</td>
+											<td>
+												@if($tempUser->is_expired)
+													<span class="badge bg-danger">
+														<i class="fas fa-exclamation-triangle me-1"></i>К удалению
+													</span>
+												@elseif($tempUser->days_until_deletion <= 1)
+													<span class="badge bg-warning">
+														<i class="fas fa-clock me-1"></i>Скоро удаление
+													</span>
+												@else
+													<span class="badge bg-success">
+														<i class="fas fa-check me-1"></i>Активен
+													</span>
+												@endif
+											</td>
+											<td>
+												@if(Auth::user()->isSuperAdmin())
+													<div class="btn-group btn-group-sm">
+														<form method="POST" action="{{ route('admin.temp-users.verify', $tempUser->id) }}" class="d-inline">
+															@csrf
+															<button type="submit" 
+																	class="btn btn-outline-success btn-sm" 
+																	title="Подтвердить email вручную"
+																	onclick="return confirm('Вы уверены, что хотите подтвердить email пользователя {{ $tempUser->name }}?')">
+																<i class="fas fa-check"></i>
+															</button>
+														</form>
+														<button type="button" 
+																class="btn btn-outline-danger btn-sm" 
+																title="Удалить временный аккаунт"
+																data-bs-toggle="modal" 
+																data-bs-target="#deleteTempUserModal{{ $tempUser->id }}">
+															<i class="fas fa-trash"></i>
+														</button>
+													</div>
+												@endif
+											</td>
+										</tr>
+									@empty
+										<tr>
+											<td colspan="6" class="text-center text-muted py-4">
+												<i class="fas fa-user-check fa-2x mb-2"></i><br>
+												Нет временных аккаунтов
 											</td>
 										</tr>
 									@endforelse
@@ -575,6 +681,61 @@
 								@method('DELETE')
 								<button type="submit" class="btn btn-danger">
 									<i class="fas fa-trash me-2"></i>Удалить пользователя
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		@endif
+	@endforeach
+
+	<!-- Модальные окна подтверждения удаления временных аккаунтов -->
+	@foreach($tempUsers as $tempUser)
+		@if(Auth::user()->isSuperAdmin())
+			<div class="modal fade" id="deleteTempUserModal{{ $tempUser->id }}" tabindex="-1" aria-labelledby="deleteTempUserModalLabel{{ $tempUser->id }}" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header bg-danger text-white">
+							<h5 class="modal-title" id="deleteTempUserModalLabel{{ $tempUser->id }}">
+								<i class="fas fa-exclamation-triangle me-2"></i>Удаление временного аккаунта
+							</h5>
+							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+						</div>
+						<div class="modal-body">
+							<div class="alert alert-warning">
+								<i class="fas fa-exclamation-triangle me-2"></i>
+								<strong>Внимание!</strong> Это действие необратимо.
+							</div>
+							<p>Вы действительно хотите удалить временный аккаунт <strong>{{ $tempUser->name }}</strong>?</p>
+							<p class="text-muted small">
+								При удалении временного аккаунта будут также удалены:
+							</p>
+							<ul class="text-muted small">
+								<li>Все посты пользователя</li>
+								<li>Все комментарии пользователя</li>
+								<li>Все рейтинги пользователя</li>
+								<li>Все фотографии пользователя</li>
+							</ul>
+							<div class="alert alert-info">
+								<i class="fas fa-info-circle me-2"></i>
+								<strong>Информация:</strong> Пользователь зарегистрирован {{ $tempUser->days_since_registration }} дней назад.
+								@if($tempUser->is_expired)
+									<span class="text-danger">Аккаунт просрочен и подлежит удалению.</span>
+								@else
+									<span class="text-warning">До автоматического удаления: {{ $tempUser->days_until_deletion }} дней.</span>
+								@endif
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+								<i class="fas fa-times me-2"></i>Отмена
+							</button>
+							<form method="POST" action="{{ route('admin.temp-users.delete', $tempUser->id) }}" class="d-inline">
+								@csrf
+								@method('DELETE')
+								<button type="submit" class="btn btn-danger">
+									<i class="fas fa-trash me-2"></i>Удалить временный аккаунт
 								</button>
 							</form>
 						</div>

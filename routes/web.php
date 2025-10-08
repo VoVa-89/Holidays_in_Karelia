@@ -25,8 +25,11 @@ use Illuminate\Support\Facades\Route;
 // Главная страница - лендинг с картой
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Аутентификация
-Auth::routes();
+// Аутентификация + ограничение частоты + верификация email
+// DEV (Open Server): более мягкий лимит, чтобы не ловить 429 при тестах
+Route::middleware('throttle:60,1')->group(function () {
+    Auth::routes(['verify' => true]);
+});
 
 // Статическая страница: Правила публикации
 Route::view('/guidelines', 'pages.guidelines')->name('guidelines');
@@ -35,11 +38,14 @@ Route::view('/guidelines', 'pages.guidelines')->name('guidelines');
 Route::prefix('posts')->name('posts.')->group(function () {
     // CRUD операции (только для аутентифицированных)
     Route::middleware('auth')->group(function () {
-        Route::get('/create', [PostController::class, 'create'])->name('create');
-        Route::post('/', [PostController::class, 'store'])->name('store');
-        Route::get('/{slug}/edit', [PostController::class, 'edit'])->name('edit');
-        Route::put('/{slug}', [PostController::class, 'update'])->name('update');
-        Route::delete('/{slug}', [PostController::class, 'destroy'])->name('destroy');
+        // Требуем подтвержденный email для публикации
+        Route::middleware('verified')->group(function () {
+            Route::get('/create', [PostController::class, 'create'])->name('create');
+            Route::post('/', [PostController::class, 'store'])->name('store');
+            Route::get('/{slug}/edit', [PostController::class, 'edit'])->name('edit');
+            Route::put('/{slug}', [PostController::class, 'update'])->name('update');
+            Route::delete('/{slug}', [PostController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Список постов (доступно всем) - должен быть после create
@@ -103,6 +109,17 @@ Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->gro
     Route::get('/moderation', [AdminController::class, 'moderation'])->name('moderation');
     Route::post('/posts/{id}/approve', [AdminController::class, 'approvePost'])->name('posts.approve');
     Route::post('/posts/{id}/reject', [AdminController::class, 'rejectPost'])->name('posts.reject');
+
+    // Мониторинг логов
+    Route::get('/logs', [AdminController::class, 'logs'])->name('logs');
+    Route::get('/logs/download', [AdminController::class, 'downloadLog'])->name('logs.download');
+    Route::post('/logs/clear', [AdminController::class, 'clearLogs'])->name('logs.clear');
+
+    // Управление временными аккаунтами (только для супер-администраторов)
+    Route::middleware('superadmin')->group(function () {
+        Route::post('/temp-users/{id}/verify', [AdminController::class, 'verifyTempUser'])->name('temp-users.verify');
+        Route::delete('/temp-users/{id}/delete', [AdminController::class, 'deleteTempUser'])->name('temp-users.delete');
+    });
 
     // Управление пользователями (только для супер-администраторов)
     Route::middleware('superadmin')->group(function () {

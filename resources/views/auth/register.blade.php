@@ -21,6 +21,12 @@
                     <!-- Форма регистрации -->
                     <form method="POST" action="{{ route('register') }}" novalidate>
                         @csrf
+                        <!-- Honeypot поля -->
+                        <div style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;">
+                            <label for="website">Website</label>
+                            <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
+                            <input type="hidden" name="form_started_at" value="{{ time() }}">
+                        </div>
 
                         <!-- Имя -->
                         <div class="mb-3">

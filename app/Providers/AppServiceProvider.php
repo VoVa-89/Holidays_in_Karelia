@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // В локальной среде (Open Server) принудительно используем mailer=log,
+        // чтобы избежать ошибок подключения к SMTP (mailpit и т.п.)
+        if (App::environment('local')) {
+            Config::set('mail.default', 'log');
+        }
     }
 }
