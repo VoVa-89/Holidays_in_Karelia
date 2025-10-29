@@ -30,5 +30,15 @@ final class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+
+        // Кастомизация письма подтверждения email
+        \Illuminate\Auth\Notifications\VerifyEmail::toMailUsing(function ($notifiable, string $url) {
+            return (new \Illuminate\Notifications\Messages\MailMessage)
+                ->subject('Подтвердите email')
+                ->greeting('Здравствуйте!')
+                ->line('Пожалуйста, подтвердите свой email для завершения регистрации на сайте «Отдых в Карелии».')
+                ->action('Подтвердить email', $url)
+                ->line('Если вы не регистрировались, просто проигнорируйте это письмо.');
+        });
     }
 }

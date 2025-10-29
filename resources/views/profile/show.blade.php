@@ -54,9 +54,18 @@
                                             <i class="fas fa-check-circle me-1"></i>Да
                                         </span>
                                     @else
-                                        <span class="text-warning">
-                                            <i class="fas fa-exclamation-triangle me-1"></i>Нет
-                                        </span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-warning me-2">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Нет
+                                            </span>
+                                            <form method="POST" action="{{ route('verification.resend') }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                    Отправить письмо снова
+                                                </button>
+                                            </form>
+                                            <a href="{{ route('verification.notice') }}" class="btn btn-sm btn-link ms-2">Перейти на страницу подтверждения</a>
+                                        </div>
                                     @endif
                                 </div>
                                 <div class="col-sm-6 mb-3">
@@ -139,6 +148,71 @@
                     </div>
                 </div>
             </div>
+
+			<!-- Комментарии/Оценки во вкладках -->
+			@if((isset($myComments) && $myComments->count() > 0) || (isset($myRatings) && $myRatings->count() > 0))
+				<div class="card mb-4">
+					<div class="card-header">
+						<ul class="nav nav-tabs card-header-tabs" role="tablist">
+							<li class="nav-item" role="presentation">
+								<button class="nav-link active" id="tab-comments-tab" data-bs-toggle="tab" data-bs-target="#tab-comments" type="button" role="tab">Комментарии</button>
+							</li>
+							<li class="nav-item" role="presentation">
+								<button class="nav-link" id="tab-ratings-tab" data-bs-toggle="tab" data-bs-target="#tab-ratings" type="button" role="tab">Оценки</button>
+							</li>
+						</ul>
+					</div>
+					<div class="card-body">
+						<div class="tab-content">
+							<div class="tab-pane fade show active" id="tab-comments" role="tabpanel" aria-labelledby="tab-comments-tab">
+								@if(isset($myComments) && $myComments->count() > 0)
+									<div class="list-group list-group-flush">
+										@foreach($myComments as $comment)
+											<div class="list-group-item">
+												<div class="d-flex justify-content-between align-items-start">
+													<div class="me-3">
+														<a href="{{ route('posts.show', $comment->post->slug) }}" class="text-decoration-none fw-semibold">{{ $comment->post->title }}</a>
+														<div class="text-muted small mt-1">{{ $comment->created_at->format('d.m.Y H:i') }}</div>
+													</div>
+													<div class="flex-grow-1">
+														<div class="text-muted">{{ Str::limit($comment->content, 150) }}</div>
+													</div>
+												</div>
+											</div>
+										@endforeach
+									</div>
+									<div class="mt-3">
+										{{ $myComments->withQueryString()->onEachSide(1)->links() }}
+									</div>
+								@else
+									<div class="text-muted">Комментариев нет</div>
+								@endif
+							</div>
+
+							<div class="tab-pane fade" id="tab-ratings" role="tabpanel" aria-labelledby="tab-ratings-tab">
+								@if(isset($myRatings) && $myRatings->count() > 0)
+									<div class="list-group list-group-flush">
+										@foreach($myRatings as $rating)
+											<div class="list-group-item d-flex justify-content-between align-items-center">
+												<div>
+													<a href="{{ route('posts.show', $rating->post->slug) }}" class="text-decoration-none fw-semibold">{{ $rating->post->title }}</a>
+													<div class="text-muted small mt-1">{{ $rating->created_at->format('d.m.Y H:i') }}</div>
+												</div>
+												<span class="badge bg-warning text-dark">★ {{ $rating->value }}</span>
+											</div>
+										@endforeach
+									</div>
+									<div class="mt-3">
+										{{ $myRatings->withQueryString()->onEachSide(1)->links() }}
+									</div>
+								@else
+									<div class="text-muted">Оценок нет</div>
+								@endif
+							</div>
+						</div>
+					</div>
+				</div>
+			@endif
 
             <!-- Последние посты -->
             @if($recentPosts->count() > 0)

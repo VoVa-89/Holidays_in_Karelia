@@ -403,6 +403,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Response status:', response.status);
                 
                 if (!response.ok) {
+                    // Если email не подтвержден — 403
+                    if (response.status === 403) {
+                        return response.json().then(data => {
+                            const msg = data && data.message ? data.message : 'Для добавления комментариев необходимо подтвердить email.';
+                            throw { type: 'forbidden', message: msg };
+                        }).catch(() => {
+                            // если не JSON
+                            throw { type: 'forbidden', message: 'Для добавления комментариев необходимо подтвердить email. Проверьте почту или отправьте письмо повторно в профиле.' };
+                        });
+                    }
                     // Для ошибок валидации (422) пытаемся получить JSON
                     if (response.status === 422) {
                         return response.json().then(data => {
@@ -444,6 +454,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error:', error);
                 
+                if (error.type === 'forbidden') {
+                    showNotification(error.message, 'error');
+                    return;
+                }
                 // Обрабатываем ошибки валидации
                 if (error.type === 'validation') {
                     if (error.data.errors) {

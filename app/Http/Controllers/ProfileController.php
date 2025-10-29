@@ -56,7 +56,19 @@ final class ProfileController extends Controller
             ->limit(5)
             ->get();
 
-        return view('profile.show', compact('user', 'stats', 'recentPosts'));
+        // Комментарии пользователя с привязкой к посту (пагинация)
+        $myComments = $user->comments()
+            ->with(['post:id,slug,title'])
+            ->orderByDesc('created_at')
+            ->paginate(10, ['*'], 'comments_page');
+
+        // Оценки пользователя с привязкой к посту (пагинация)
+        $myRatings = $user->ratings()
+            ->with(['post:id,slug,title'])
+            ->orderByDesc('created_at')
+            ->paginate(10, ['*'], 'ratings_page');
+
+        return view('profile.show', compact('user', 'stats', 'recentPosts', 'myComments', 'myRatings'));
     }
 
     /**
@@ -92,10 +104,28 @@ final class ProfileController extends Controller
             'email.unique' => 'Этот email уже используется другим пользователем.',
         ]);
 
-        $user->update([
+        // Подготовим к обновлению и проверим, менялся ли email
+        $user->fill([
             'name' => $request->name,
             'email' => $request->email,
         ]);
+
+        $emailChanged = $user->isDirty('email');
+        if ($emailChanged) {
+            // Сброс подтверждения и отправка нового письма
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        if ($emailChanged) {
+            // Отправляем письмо для подтверждения нового email
+            $user->sendEmailVerificationNotification();
+
+            return redirect()
+                ->route('verification.notice')
+                ->with('info', 'Мы отправили письмо для подтверждения нового email. Проверьте почту.');
+        }
 
         return redirect()
             ->route('profile.show')

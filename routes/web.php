@@ -89,14 +89,14 @@ Route::prefix('categories')->name('categories.')->group(function () {
     Route::get('/{slug}', [CategoryController::class, 'show'])->name('show');
 });
 
-// Маршруты для комментариев (только для аутентифицированных)
-Route::middleware('auth')->prefix('comments')->name('comments.')->group(function () {
+// Маршруты для комментариев (только для аутентифицированных и подтвержденных)
+Route::middleware(['auth','verified.message'])->prefix('comments')->name('comments.')->group(function () {
     Route::post('/posts/{postSlug}', [CommentController::class, 'store'])->name('store');
     Route::delete('/{id}', [CommentController::class, 'destroy'])->name('destroy');
 });
 
-// Маршруты для оценок (только для аутентифицированных)
-Route::middleware('auth')->prefix('ratings')->name('ratings.')->group(function () {
+// Маршруты для оценок (только для аутентифицированных и подтвержденных)
+Route::middleware(['auth','verified.message'])->prefix('ratings')->name('ratings.')->group(function () {
     Route::post('/posts/{postSlug}', [RatingController::class, 'store'])->name('store');
 });
 

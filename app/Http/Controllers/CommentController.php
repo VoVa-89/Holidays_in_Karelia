@@ -37,6 +37,20 @@ final class CommentController extends Controller
     {
         $post = Post::where('slug', $postSlug)->firstOrFail();
 
+        // Проверяем, что email подтвержден
+        if (!Auth::user()->hasVerifiedEmail()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Для добавления комментариев необходимо подтвердить email. Проверьте почту или запросите повторную отправку письма в профиле.'
+                ], 403);
+            }
+
+            return redirect()
+                ->route('verification.notice')
+                ->with('warning', 'Для добавления комментариев необходимо подтвердить email. Проверьте почту или запросите повторную отправку письма в профиле.');
+        }
+
         // Проверяем, что пост опубликован
         if ($post->status !== 'published') {
             if ($request->expectsJson()) {

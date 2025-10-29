@@ -427,6 +427,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Response headers:', response.headers);
                 
                 if (!response.ok) {
+                    if (response.status === 403) {
+                        return response.json().then(data => {
+                            const msg = data && data.message ? data.message : 'Для оценки постов необходимо подтвердить email.';
+                            throw { type: 'forbidden', message: msg };
+                        }).catch(() => {
+                            throw { type: 'forbidden', message: 'Для оценки постов необходимо подтвердить email. Проверьте почту или отправьте письмо повторно в профиле.' };
+                        });
+                    }
                     // Попробуем получить текст ошибки
                     return response.text().then(text => {
                         console.log('Error response text:', text);
@@ -453,6 +461,10 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Rating submission error:', error);
+                if (error.type === 'forbidden') {
+                    showRatingNotification(error.message, 'error');
+                    return;
+                }
                 showRatingNotification('Произошла ошибка при сохранении оценки', 'error');
             })
             .finally(() => {

@@ -56,6 +56,20 @@ final class RatingController extends Controller
                 ->with('error', 'Необходима авторизация для оценки постов.');
         }
 
+        // Проверяем, что email подтвержден
+        if (!Auth::user()->hasVerifiedEmail()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Для оценки постов необходимо подтвердить email. Проверьте почту или запросите повторную отправку письма в профиле.'
+                ], 403);
+            }
+
+            return redirect()
+                ->route('verification.notice')
+                ->with('warning', 'Для оценки постов необходимо подтвердить email. Проверьте почту или запросите повторную отправку письма в профиле.');
+        }
+
         // Проверяем, что пост опубликован
         if ($post->status !== 'published') {
             if ($request->expectsJson()) {
