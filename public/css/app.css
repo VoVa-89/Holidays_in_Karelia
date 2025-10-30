@@ -393,6 +393,15 @@ body {
     line-height: 1.2;
 }
 
+/* Десктоп ≥992px: фиксируем заголовок в одну строку */
+@media (min-width: 992px) {
+    .hero-title {
+        white-space: nowrap;
+        word-break: normal;
+        hyphens: manual;
+    }
+}
+
 .hero-meta {
     display: flex;
     justify-content: space-between;

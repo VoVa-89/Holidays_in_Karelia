@@ -14,9 +14,8 @@
 		">
 			<div class="row align-items-center h-100">
 				<div class="col-lg-7 mb-4 mb-lg-0">
-					<h1 class="display-5 fw-bold mb-3 text-white" style="white-space: nowrap;">
-						<i class="fas fa-mountain text-warning me-2"></i>
-						Открой Карелию вместе с&nbsp;нами
+					<h1 class="hero-title fw-bold mb-3 text-white">
+						Открой Карелию вместе с нами
 					</h1>
 					<p class="lead text-white mb-4" style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); font-weight: 500;">
 						Маршруты, достопримечательности и лучшие места отдыха. Реальные отзывы, фото и удобная карта с метками.
