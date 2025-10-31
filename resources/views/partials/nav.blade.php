@@ -7,13 +7,13 @@
 		</a>
 
 		<!-- Кнопка мобильного меню -->
-		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Переключить навигацию">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 
 		<!-- Основное меню -->
 		<div class="collapse navbar-collapse" id="navbarNav">
-			<ul class="navbar-nav me-auto flex-nowrap">
+			<ul class="navbar-nav me-auto">
 				<!-- Главная -->
 				<li class="nav-item">
 					<a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
@@ -24,7 +24,7 @@
 				<!-- Категории -->
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle {{ request()->routeIs('categories.*') ? 'active' : '' }}" 
-					   href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+					   href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
 						<i class="fas fa-list me-1"></i>Категории
 					</a>
 					<ul class="dropdown-menu">
@@ -59,8 +59,8 @@
 				@auth
 					@if(auth()->user()->isAdmin())
 						<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle {{ request()->routeIs('admin.*') ? 'active' : '' }}" 
-							   href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+						<a class="nav-link dropdown-toggle {{ request()->routeIs('admin.*') ? 'active' : '' }}" 
+					   href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
 									<i class="fas fa-cog me-1"></i>Админ
 							</a>
 							<ul class="dropdown-menu">
@@ -150,14 +150,14 @@
 
 					<!-- Выпадающее меню пользователя -->
 					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle d-flex align-items-center" 
-						   href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+					<a class="nav-link dropdown-toggle d-flex align-items-center" 
+					   href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
 							<!-- Аватар пользователя -->
 							<div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
 								 style="width: 32px; height: 32px;">
 								<i class="fas fa-user text-white small"></i>
 							</div>
-							<span class="d-none d-md-inline">{{ auth()->user()->name }}</span>
+						<span class="d-inline">{{ auth()->user()->name }}</span>
 						</a>
 						<ul class="dropdown-menu dropdown-menu-end">
 							<li class="dropdown-header">
@@ -291,18 +291,25 @@
 			margin-top: 1rem;
 			padding-top: 1rem;
 			border-top: 1px solid var(--bs-border-color);
+			width: 100%;
 		}
 		
 		.navbar-nav .nav-item {
 			margin-bottom: 0.5rem;
 		}
 		
+		/* Дропдауны в коллапсе — статичны и прокручиваемы */
 		.navbar-nav .dropdown-menu {
 			position: static !important;
 			transform: none !important;
 			box-shadow: none;
 			border: 1px solid var(--bs-border-color);
 			margin-top: 0.5rem;
+			max-height: 50vh;
+			overflow-y: auto;
 		}
+
+		/* Разрешаем перенос строк */
+		.navbar-nav { flex-wrap: wrap; }
 	}
 </style>
