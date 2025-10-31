@@ -343,4 +343,28 @@
 			align-items: center;
 		}
 	}
+	
+	/* Переопределяем конфликтующие правила из app.css для Bootstrap navbar */
+	/* Это исправляет проблему, когда app.css скрывает все .navbar-nav на мобильных */
+	@media (max-width: 768px) {
+		.navbar .navbar-nav {
+			position: static !important;
+			opacity: 1 !important;
+			visibility: visible !important;
+			transform: none !important;
+			top: auto !important;
+			left: auto !important;
+			right: auto !important;
+		}
+		
+		.navbar-collapse .navbar-nav {
+			position: static !important;
+			opacity: 1 !important;
+			visibility: visible !important;
+			transform: none !important;
+			top: auto !important;
+			left: auto !important;
+			right: auto !important;
+		}
+	}
 </style>
