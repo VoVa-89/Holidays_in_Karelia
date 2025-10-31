@@ -140,14 +140,6 @@
 						</a>
 					</li>
 				@else
-					<!-- Кнопка создания поста -->
-					<li class="nav-item">
-						<a class="btn btn-cta {{ request()->routeIs('posts.create') ? 'active' : '' }}" 
-						   href="{{ route('posts.create') }}">
-							<i class="fas fa-plus me-1"></i>Создать пост
-						</a>
-					</li>
-
 					<!-- Выпадающее меню пользователя -->
 					<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle d-flex align-items-center" 
