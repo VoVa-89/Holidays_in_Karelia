@@ -298,8 +298,9 @@
 			margin-bottom: 0.5rem;
 		}
 		
-		/* Дропдауны в коллапсе — статичны и прокручиваемы */
-		.navbar-nav .dropdown-menu {
+		/* Дропдауны в коллапсе — статичны, полной ширины и прокручиваемы */
+		.navbar-nav .dropdown-menu,
+		.navbar-nav .dropdown-menu.dropdown-menu-end {
 			position: static !important;
 			transform: none !important;
 			box-shadow: none;
@@ -307,9 +308,39 @@
 			margin-top: 0.5rem;
 			max-height: 50vh;
 			overflow-y: auto;
+			width: 100% !important;
+			right: auto !important;
+			left: auto !important;
 		}
 
 		/* Разрешаем перенос строк */
-		.navbar-nav { flex-wrap: wrap; }
+		.navbar-nav { 
+			flex-wrap: wrap; 
+		}
+		
+		/* Правая часть меню (кнопка создания поста + профиль) видна и занимает всю ширину */
+		.navbar-nav:not(.me-auto) {
+			width: 100%;
+			margin-top: 0.5rem;
+		}
+		
+		.navbar-nav:not(.me-auto) .nav-item {
+			width: 100%;
+			margin-bottom: 0.5rem;
+		}
+		
+		/* Кнопки и ссылки в правой части на всю ширину */
+		.navbar-nav:not(.me-auto) .btn,
+		.navbar-nav:not(.me-auto) .nav-link {
+			width: 100%;
+			justify-content: flex-start;
+		}
+		
+		/* Дропдаун профиля должен быть виден и кликабелен */
+		.navbar-nav:not(.me-auto) .dropdown-toggle {
+			width: 100%;
+			display: flex;
+			align-items: center;
+		}
 	}
 </style>
