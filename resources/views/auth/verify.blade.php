@@ -26,13 +26,20 @@
                         </div>
                     @endif
 
-                    @if (session('resent'))
+                    @if (session('status') === 'verification-link-sent' || session('resent'))
                         <div class="alert alert-success" role="alert">
                             Новое письмо с подтверждением отправлено на ваш email.
                         </div>
                     @endif
 
-                    <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
+                    <div class="alert alert-info">
+                        Мы отправили письмо на <strong>{{ optional(auth()->user())->email }}</strong>.
+                        Проверьте «Входящие». Если письма нет в течение 2–3 минут — загляните в папку «Спам»
+                        и отметьте «Не спам». Нажмите ниже, чтобы отправить письмо ещё раз.
+                    </div>
+
+                    @php $resendRoute = \Illuminate\Support\Facades\Route::has('verification.send') ? 'verification.send' : 'verification.resend'; @endphp
+                    <form class="d-inline" method="POST" action="{{ route($resendRoute) }}">
                         @csrf
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-paper-plane me-2"></i>Отправить письмо ещё раз
