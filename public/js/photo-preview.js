@@ -25,6 +25,18 @@ class PhotoPreview {
         this.updatePreview();
     }
 
+    // Синхронизируем текущие выбранные файлы с реальным input.files,
+    // чтобы они отправились на сервер при сабмите формы
+    syncInputFiles() {
+        try {
+            const dt = new DataTransfer();
+            this.files.forEach(file => dt.items.add(file));
+            this.input.files = dt.files;
+        } catch (e) {
+            console.warn('PhotoPreview: syncInputFiles failed', e);
+        }
+    }
+
     bindEvents() {
         this.input.addEventListener('change', (e) => {
             this.handleFileSelect(e.target.files);
@@ -45,6 +57,7 @@ class PhotoPreview {
             e.preventDefault();
             this.preview.classList.remove('drag-over');
             this.handleFileSelect(e.dataTransfer.files);
+            this.syncInputFiles();
         });
     }
 
@@ -66,6 +79,7 @@ class PhotoPreview {
         }
 
         this.updatePreview();
+        this.syncInputFiles();
     }
 
     validateFile(file) {
@@ -138,6 +152,7 @@ class PhotoPreview {
 
         this.updatePreview();
         this.updateMainIndexInput();
+        this.syncInputFiles();
     }
 
     setMain(index) {
@@ -166,6 +181,7 @@ class PhotoPreview {
         this.mainIndex = 0;
         this.updatePreview();
         this.updateMainIndexInput();
+        this.syncInputFiles();
     }
 }
 
