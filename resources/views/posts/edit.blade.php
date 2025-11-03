@@ -227,9 +227,15 @@
 				el.style.display = 'none';
 				const quill = new Quill('#editor', { theme: 'snow', placeholder: 'Опишите место, как добраться, что посмотреть...' });
 				quill.root.innerHTML = initial ? initial : '';
-				document.getElementById('post-edit-form').addEventListener('submit', function(){
-					el.value = quill.root.innerHTML;
-				});
+                document.getElementById('post-edit-form').addEventListener('submit', function(){
+                    el.value = quill.root.innerHTML;
+
+                    // Преобразуем main_index для новых фото в формат new_{index}, как ожидает backend
+                    const mi = document.getElementById('main_index');
+                    if (mi && mi.value !== '' && !isNaN(mi.value)) {
+                        mi.value = 'new_' + mi.value;
+                    }
+                });
 
 				// Autosave draft for edit
 				const DRAFT_KEY = 'post_edit_draft_{{ $post->id }}';
@@ -403,35 +409,45 @@
 				});
 
 				// === УДАЛЕНИЕ СУЩЕСТВУЮЩИХ ФОТО ===
-				deleteButtons.forEach(function(btn, i) {
-					console.log(`🗑️ Кнопка удаления ${i + 1}:`, btn.dataset.photoId);
-					
-					btn.onclick = function() {
-						const photoId = this.dataset.photoId;
-						console.log('🎯 КЛИК УДАЛЕНИЯ:', photoId);
-						
-						if (confirm('Удалить фотографию?')) {
-							const card = this.closest('[data-photo-id]');
-							
-							// Добавляем в список удаляемых
-							const deleted = deletedPhotos.value ? deletedPhotos.value.split(',') : [];
-							deleted.push(photoId);
-							deletedPhotos.value = deleted.join(',');
-							
-							// Визуальные изменения
-							card.style.opacity = '0.3';
-							card.style.filter = 'grayscale(100%)';
-							
-							// Добавляем метку
-							const label = document.createElement('div');
-							label.className = 'position-absolute top-50 start-50 translate-middle';
-							label.innerHTML = '<span class="badge bg-danger">УДАЛЕНО</span>';
-							card.querySelector('.position-relative').appendChild(label);
-							
-							console.log('✅ Фото помечено для удаления:', photoId);
-						}
-					};
-				});
+                deleteButtons.forEach(function(btn, i) {
+                    console.log(`🗑️ Кнопка удаления ${i + 1}:`, btn.dataset.photoId);
+                    
+                    btn.onclick = function() {
+                        const photoId = this.dataset.photoId;
+                        console.log('🎯 КЛИК УДАЛЕНИЯ:', photoId);
+
+                        // блокируем повторные клики
+                        if (this.dataset.deleted === '1') {
+                            return;
+                        }
+                        
+                        if (confirm('Удалить фотографию?')) {
+                            const card = this.closest('[data-photo-id]');
+                            
+                            // Добавляем в список удаляемых
+                            const deleted = deletedPhotos.value ? deletedPhotos.value.split(',') : [];
+                            deleted.push(photoId);
+                            deletedPhotos.value = deleted.join(',');
+                            
+                            // Визуальные изменения
+                            if (card) {
+                                card.style.opacity = '0.3';
+                                card.style.filter = 'grayscale(100%)';
+                                
+                                // Добавляем метку
+                                const label = document.createElement('div');
+                                label.className = 'position-absolute top-50 start-50 translate-middle';
+                                label.innerHTML = '<span class="badge bg-danger">УДАЛЕНО</span>';
+                                const rel = card.querySelector('.position-relative') || card;
+                                rel.appendChild(label);
+                            }
+
+                            this.dataset.deleted = '1';
+                            
+                            console.log('✅ Фото помечено для удаления:', photoId);
+                        }
+                    };
+                });
 
 				// === ВЫБОР ОСНОВНОЙ ФОТО ===
 				mainBadges.forEach(function(badge, i) {
@@ -459,7 +475,7 @@
 				});
 
 				// === НОВЫЕ ФОТОГРАФИИ С PHOTOPREVIEW ===
-				if (input && preview && mainIndex) {
+                if (input && preview && mainIndex) {
 					console.log('📷 Инициализируем PhotoPreview для новых фото');
 					
 					// Инициализируем PhotoPreview для новых фотографий
@@ -473,7 +489,10 @@
 					});
 					
 					// Включаем drag & drop
-					window.photoPreviewEdit.enableDragDrop();
+                    window.photoPreviewEdit.enableDragDrop();
+
+                    // Алиас для inline-обработчиков в шаблоне превью
+                    window.photoPreview = window.photoPreviewEdit;
 				}
 				
 				console.log('📷 === ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
