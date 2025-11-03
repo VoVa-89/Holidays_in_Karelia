@@ -192,6 +192,9 @@
         display: flex;
         gap: 0.25rem;
         margin-bottom: 0.5rem;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: pan-y; /* позволяем вертикальную прокрутку, обрабатываем горизонтальный свайп */
     }
 
     .rating-star {
@@ -320,9 +323,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const changeBtn = ratingComponent.querySelector('#change-rating-btn');
     const quickRate5Btn = ratingComponent.querySelector('#quick-rate-5-btn');
     const ratingActions = ratingComponent.querySelector('.rating-actions');
+    const starsContainer = ratingComponent.querySelector('.rating-stars-interactive');
     
     let currentRating = {{ $userRating ?? 0 }};
     let isVoting = false;
+    let lastPreviewRating = currentRating;
+    let lastVibrateValue = 0;
+    let rafToken = 0;
+
+    function vibrateOnce(value) {
+        if (!('vibrate' in navigator)) return;
+        if (value === lastVibrateValue) return;
+        lastVibrateValue = value;
+        try { navigator.vibrate && navigator.vibrate(10); } catch (_) {}
+    }
+
+    function ratingFromTouchX(clientX) {
+        if (!starsContainer) return currentRating || 1;
+        const rect = starsContainer.getBoundingClientRect();
+        const relX = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+        const starWidth = rect.width / 5;
+        const value = Math.ceil(relX / starWidth) || 1;
+        return Math.min(Math.max(value, 1), 5);
+    }
 
     // Инициализация - если у пользователя уже есть оценка, активируем кнопку
     if (currentRating > 0) {
@@ -356,6 +379,41 @@ document.addEventListener('DOMContentLoaded', function() {
             selectRating(rating);
         });
     });
+
+    // Свайп по контейнеру звёзд (mobile-friendly)
+    if (starsContainer) {
+        starsContainer.addEventListener('touchstart', (e) => {
+            if (isVoting) return;
+            if (!e.touches || !e.touches.length) return;
+            e.preventDefault();
+            const value = ratingFromTouchX(e.touches[0].clientX);
+            if (value !== lastPreviewRating) {
+                lastPreviewRating = value;
+                cancelAnimationFrame(rafToken);
+                rafToken = requestAnimationFrame(() => highlightStars(value));
+                vibrateOnce(value);
+            }
+        }, { passive: false });
+
+        starsContainer.addEventListener('touchmove', (e) => {
+            if (isVoting) return;
+            if (!e.touches || !e.touches.length) return;
+            e.preventDefault();
+            const value = ratingFromTouchX(e.touches[0].clientX);
+            if (value !== lastPreviewRating) {
+                lastPreviewRating = value;
+                cancelAnimationFrame(rafToken);
+                rafToken = requestAnimationFrame(() => highlightStars(value));
+                vibrateOnce(value);
+            }
+        }, { passive: false });
+
+        starsContainer.addEventListener('touchend', (e) => {
+            if (isVoting) return;
+            const value = lastPreviewRating || currentRating || 1;
+            selectRating(value);
+        });
+    }
 
     // Сброс подсветки при уходе мыши
     ratingComponent.addEventListener('mouseleave', function() {
