@@ -70,14 +70,19 @@
                     </div>
 
                     <div class="rating-actions mt-2">
-                        @if($userRating)
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="change-rating-btn">
-                                <i class="fas fa-edit me-1"></i>Изменить оценку
-                            </button>
-                        @else
-                            <button type="submit" class="btn btn-sm btn-primary" id="submit-rating-btn" disabled>
-                                <i class="fas fa-star me-1"></i>Оценить
-                            </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary {{ $userRating ? '' : 'd-none' }}" id="change-rating-btn">
+                            <i class="fas fa-edit me-1"></i>Изменить оценку
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-sm btn-primary ms-0 {{ $userRating ? 'd-none' : '' }}"
+                                id="submit-rating-btn"
+                                {{ $userRating ? '' : 'disabled' }}>
+                            <i class="fas fa-star me-1"></i>
+                            <span class="submit-label">{{ $userRating ? 'Сохранить' : 'Оценить' }}</span>
+                        </button>
+
+                        @if(!$userRating)
                             <button type="button" class="btn btn-sm btn-outline-warning ms-2" id="quick-rate-5-btn">
                                 <i class="fas fa-star me-1"></i>Оценить на 5 звезд
                             </button>
@@ -287,12 +292,17 @@
         }
         
         .rating-stars-interactive {
-            gap: 0.125rem;
+            gap: 0.25rem;
         }
         
         .rating-star {
-            font-size: 1.25rem;
-            padding: 0.125rem;
+            font-size: 1.75rem;    /* крупнее для тача */
+            padding: 0.25rem;      /* больше тач‑таргет */
+        }
+
+        .rating-actions .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
         }
     }
 </style>
@@ -324,18 +334,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Обработка наведения на звезды
+    // Обработка наведения/тача и клика по звездам
     ratingStars.forEach((star, index) => {
         star.addEventListener('mouseenter', function() {
             if (isVoting) return;
-            
             const rating = parseInt(this.dataset.rating);
             highlightStars(rating);
         });
 
+        // touchstart для мобильных
+        star.addEventListener('touchstart', function(e) {
+            if (isVoting) return;
+            e.preventDefault();
+            const rating = parseInt(this.dataset.rating);
+            selectRating(rating);
+        }, { passive: false });
+
         star.addEventListener('click', function() {
             if (isVoting) return;
-            
             const rating = parseInt(this.dataset.rating);
             selectRating(rating);
         });
@@ -374,6 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (submitBtn) {
+            submitBtn.classList.remove('d-none');
             submitBtn.disabled = false;
         }
         
@@ -555,6 +572,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (voteSection) {
                 voteSection.style.display = 'block';
             }
+            if (submitBtn) {
+                submitBtn.classList.remove('d-none');
+                const label = submitBtn.querySelector('.submit-label');
+                if (label) label.textContent = 'Сохранить';
+                submitBtn.disabled = (currentRating === 0);
+            }
+            if (ratingActions) ratingActions.classList.add('show');
             this.style.display = 'none';
         });
     }
