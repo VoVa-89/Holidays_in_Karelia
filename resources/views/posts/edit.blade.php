@@ -14,7 +14,7 @@
 			<input type="hidden" name="status" id="status" value="moderation">
 			<input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $post->latitude) }}">
 			<input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $post->longitude) }}">
-			<input type="hidden" name="main_index" id="main_index" value="{{ old('main_index', $post->photos->where('is_main', true)->first()?->id ?? 0) }}">
+			<input type="hidden" name="main_index" id="main_index" value="">
 			<input type="hidden" name="main_photo_id" id="main_photo_id" value="{{ old('main_photo_id', $post->photos->where('is_main', true)->first()?->id ?? '') }}">
 			<input type="hidden" name="deleted_photos" id="deleted_photos" value="">
 
@@ -469,6 +469,9 @@
 						
 						// Обновляем поля
 						if (mainPhotoId) mainPhotoId.value = photoId;
+						
+						// ВАЖНО: очищаем main_index для новых фото, чтобы не конфликтовал с main_photo_id
+						if (mainIndex) mainIndex.value = '';
 						
 						console.log('✅ Основная фото установлена:', photoId);
 					};

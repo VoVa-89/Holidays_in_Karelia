@@ -314,13 +314,12 @@ final class PostController extends Controller
                 $this->handlePhotoUploads($post, $request->file('photos'), $request->get('main_index', 0));
             }
 
-            // Обновление основной фотографии среди существующих
+            // Обновление основной фотографии среди существующих (приоритет выше)
             if ($request->filled('main_photo_id')) {
                 $this->updateMainPhotoById($post, $request->get('main_photo_id'));
             }
-
-            // Обновление основной фотографии среди новых
-            if ($request->filled('main_index')) {
+            // Обновление основной фотографии среди новых (только если НЕ выбрана существующая)
+            elseif ($request->filled('main_index')) {
                 $this->updateMainPhoto($post, $request->get('main_index'));
             }
         });
