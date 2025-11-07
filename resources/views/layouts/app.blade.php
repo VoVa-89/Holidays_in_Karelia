@@ -6,7 +6,23 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'Отдых в Карелии')</title>
-    <meta name="description" content="@yield('description', 'Туристический блог и гид по Карелии. Статьи, маршруты, достопримечательности и полезная информация для путешественников.')">
+    <meta name="description" content="@yield('description', 'Забудьте о скучных путеводителях! Наш сайт — это живой гид по самым удивительным местам Карелии. Откройте для себя скрытые жемчужины, спланируйте маршрут мечты и получите незабываемые впечатления.')">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('og:title', 'Карелия: ваш идеальный отпуск начинается здесь — Отдых в Карелии')">
+    <meta property="og:description" content="@yield('og:description', 'Забудьте о скучных путеводителях! Наш сайт — это живой гид по самым удивительным местам Карелии. Откройте для себя скрытые жемчужины, спланируйте маршрут мечты и получите незабываемые впечатления.')">
+    <meta property="og:image" content="@yield('og:image', asset('images/og-image.jpg'))">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="Отдых в Карелии">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+    <meta name="twitter:title" content="@yield('og:title', 'Карелия: ваш идеальный отпуск начинается здесь — Отдых в Карелии')">
+    <meta name="twitter:description" content="@yield('og:description', 'Забудьте о скучных путеводителях! Наш сайт — это живой гид по самым удивительным местам Карелии. Откройте для себя скрытые жемчужины, спланируйте маршрут мечты и получите незабываемые впечатления.')">
+    <meta name="twitter:image" content="@yield('og:image', asset('images/og-image.jpg'))">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
