@@ -31,8 +31,9 @@ Route::middleware('throttle:60,1')->group(function () {
     Auth::routes(['verify' => true]);
 });
 
-// Статическая страница: Правила публикации
+// Статические страницы
 Route::view('/guidelines', 'pages.guidelines')->name('guidelines');
+Route::view('/about', 'pages.about')->name('about');
 
 // Маршруты для постов
 Route::prefix('posts')->name('posts.')->group(function () {
