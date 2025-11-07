@@ -95,8 +95,7 @@
                 <!-- Дополнительная информация -->
                 <div class="text-center text-muted small">
                     <p class="mb-0">
-                        <i class="fas fa-heart text-danger me-1"></i>
-                        Сделано с любовью для любителей Карелии
+                        Сделано с <i class="fas fa-heart text-danger me-1"></i> для любителей Карелии
                     </p>
                 </div>
             </div>
