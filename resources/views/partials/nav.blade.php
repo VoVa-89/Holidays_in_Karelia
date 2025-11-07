@@ -21,6 +21,13 @@
 					</a>
 				</li>
 
+				<!-- О нас -->
+				<li class="nav-item">
+					<a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">
+						<i class="fas fa-info-circle me-1"></i>О нас
+					</a>
+				</li>
+
 				<!-- Категории -->
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle {{ request()->routeIs('categories.*') ? 'active' : '' }}" 
