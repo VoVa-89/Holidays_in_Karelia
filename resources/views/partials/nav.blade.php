@@ -28,25 +28,6 @@
 					</a>
 				</li>
 
-				<!-- Категории -->
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle {{ request()->routeIs('categories.*') ? 'active' : '' }}" 
-					   href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-						<i class="fas fa-list me-1"></i>Категории
-					</a>
-					<ul class="dropdown-menu">
-						<li><a class="dropdown-item" href="{{ route('categories.index') }}">
-							<i class="fas fa-th-large me-2"></i>Все категории
-						</a></li>
-						<li><hr class="dropdown-divider"></li>
-						@foreach(\App\Models\Category::orderBy('name')->get() as $category)
-							<li><a class="dropdown-item" href="{{ route('categories.show', $category->slug) }}">
-								<i class="fas fa-tag me-2"></i>{{ $category->name }}
-							</a></li>
-						@endforeach
-					</ul>
-				</li>
-
 				<!-- Посты -->
 				<li class="nav-item">
 					<a class="nav-link {{ request()->routeIs('posts.*') && !request()->routeIs('posts.create') && !request()->routeIs('posts.edit') ? 'active' : '' }}" 

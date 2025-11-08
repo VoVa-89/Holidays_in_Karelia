@@ -110,7 +110,6 @@
                     <ul class="list-unstyled">
                         <li><a href="{{ route('home') }}" class="text-light text-decoration-none">Главная</a></li>
                         <li><a href="{{ route('about') }}" class="text-light text-decoration-none">О нас</a></li>
-                        <li><a href="{{ route('categories.index') }}" class="text-light text-decoration-none">Категории</a></li>
                         <li><a href="{{ route('guidelines') }}" class="text-light text-decoration-none">Правила публикации</a></li>
                         @auth
                             <li><a href="{{ route('posts.create') }}" class="text-light text-decoration-none">Добавить пост</a></li>
