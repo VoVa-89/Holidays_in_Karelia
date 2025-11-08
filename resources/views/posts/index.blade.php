@@ -13,12 +13,12 @@
 					<div class="col-md-4">
 						<label class="form-label">Категория</label>
 						<div class="d-flex flex-wrap gap-2">
-							@php
-								$current = request('category');
-							@endphp
-							<a href="{{ route('posts.index', request()->except(['page', 'category'])) }}" class="btn btn-outline-secondary {{ !$current ? 'active' : '' }}">Все посты</a>
-							<a href="{{ route('posts.index', array_merge(request()->except('page'), ['category' => 'dostoprimechatelnosti'])) }}" class="btn btn-outline-primary {{ $current === 'dostoprimechatelnosti' ? 'active' : '' }}">Достопримечательности</a>
-							<a href="{{ route('posts.index', array_merge(request()->except('page'), ['category' => 'mesta-otdykha'])) }}" class="btn btn-outline-primary {{ $current === 'mesta-otdykha' ? 'active' : '' }}">Места отдыха</a>
+						@php
+							$current = request('category');
+						@endphp
+						<a href="{{ route('posts.index', request()->except(['page', 'category', 'search'])) }}" class="btn btn-outline-secondary {{ !$current ? 'active' : '' }}">Все посты</a>
+						<a href="{{ route('posts.index', array_merge(request()->except(['page', 'search']), ['category' => 'dostoprimechatelnosti'])) }}" class="btn btn-outline-primary {{ $current === 'dostoprimechatelnosti' ? 'active' : '' }}">Достопримечательности</a>
+						<a href="{{ route('posts.index', array_merge(request()->except(['page', 'search']), ['category' => 'mesta-otdykha'])) }}" class="btn btn-outline-primary {{ $current === 'mesta-otdykha' ? 'active' : '' }}">Места отдыха</a>
 						</div>
 					</div>
 					<div class="col-md-4">
