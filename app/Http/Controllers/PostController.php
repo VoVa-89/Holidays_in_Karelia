@@ -118,6 +118,8 @@ final class PostController extends Controller
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'website_url' => 'nullable|url|max:255',
+            'is_personal_photos' => 'nullable|boolean',
+            'photo_source' => 'nullable|url|max:255|required_without:is_personal_photos',
             'status' => 'in:' . implode(',', Post::STATUSES),
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -162,6 +164,10 @@ final class PostController extends Controller
         $validated['status'] = $validated['status'] ?? Post::STATUS_MODERATION;
         $validated['rejection_reason'] = null;
         $validated['rejected_at'] = null;
+        $validated['is_personal_photos'] = $request->has('is_personal_photos') ? (bool)$request->is_personal_photos : false;
+        if ($validated['is_personal_photos']) {
+            $validated['photo_source'] = null;
+        }
 
         try {
             $post = DB::transaction(function () use ($validated, $request) {
@@ -255,6 +261,8 @@ final class PostController extends Controller
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'website_url' => 'nullable|url|max:255',
+            'is_personal_photos' => 'nullable|boolean',
+            'photo_source' => 'nullable|url|max:255|required_without:is_personal_photos',
             'status' => 'in:' . implode(',', Post::STATUSES),
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -294,11 +302,21 @@ final class PostController extends Controller
 
             'main_index.integer' => 'Некорректный индекс главной фотографии.',
             'main_index.min' => 'Индекс главной фотографии не может быть отрицательным.',
+
+            'photo_source.required_without' => 'Укажите источник фотографий или отметьте, что это ваши личные фотографии.',
+            'photo_source.url' => 'Источник фотографий должен быть валидной ссылкой.',
+            'photo_source.max' => 'Ссылка на источник фотографий не может быть длиннее 255 символов.',
+            'is_personal_photos.boolean' => 'Некорректное значение для поля личных фотографий.',
         ]);
 
         // Генерируем новый slug если заголовок изменился
         if ($post->title !== $validated['title']) {
             $validated['slug'] = $this->generateUniqueSlug($validated['title'], $post->id);
+        }
+
+        $validated['is_personal_photos'] = $request->has('is_personal_photos') ? (bool)$request->is_personal_photos : false;
+        if ($validated['is_personal_photos']) {
+            $validated['photo_source'] = null;
         }
 
         DB::transaction(function () use ($post, $validated, $request) {

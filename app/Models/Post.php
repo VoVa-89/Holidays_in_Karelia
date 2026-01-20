@@ -75,6 +75,8 @@ final class Post extends Model
         'rejection_reason',
         'rejected_at',
         'website_url',
+        'is_personal_photos',
+        'photo_source',
     ];
 
     protected $casts = [
@@ -83,6 +85,7 @@ final class Post extends Model
         'rating' => 'decimal:2',
         'views' => 'integer',
         'rejected_at' => 'datetime',
+        'is_personal_photos' => 'boolean',
     ];
 
     /**

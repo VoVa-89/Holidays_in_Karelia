@@ -119,6 +119,20 @@
 									</div>
 								@endforeach
 							</div>
+							
+							@if($post->is_personal_photos)
+								<div class="mt-3 text-muted small">
+									<i class="fas fa-camera me-1"></i>Фотографии автора поста
+								</div>
+							@elseif($post->photo_source)
+								<div class="mt-3">
+									<small class="text-muted">Источник фотографий: </small>
+									<a href="{{ $post->photo_source }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+										{{ $post->photo_source }}
+										<i class="fas fa-external-link-alt ms-1"></i>
+									</a>
+								</div>
+							@endif
 						</div>
 					</div>
 				@endif

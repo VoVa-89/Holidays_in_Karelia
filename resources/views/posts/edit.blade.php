@@ -125,6 +125,25 @@
 								<div class="form-text">Выберите дополнительные изображения.</div>
 								<div id="photos-preview" class="row g-2 mt-2"></div>
 							</div>
+							
+							<div class="mt-3">
+								<div class="form-check mb-3">
+									<input class="form-check-input" type="checkbox" id="is_personal_photos" name="is_personal_photos" value="1" {{ old('is_personal_photos', $post->is_personal_photos) ? 'checked' : '' }}>
+									<label class="form-check-label" for="is_personal_photos">
+										Это мои личные фотографии
+									</label>
+								</div>
+								
+								<div id="photo_source_wrapper">
+									<label for="photo_source" class="form-label">Источник фотографий <span class="text-danger">*</span></label>
+									<input type="url" id="photo_source" name="photo_source" class="form-control @error('photo_source') is-invalid @enderror" 
+										   placeholder="https://example.com/photos" value="{{ old('photo_source', $post->photo_source) }}">
+									<div class="form-text">Укажите ссылку на источник фотографий (если не ваши личные фото)</div>
+									@error('photo_source')
+										<div class="invalid-feedback">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
 						</div>
 					</div>
 
@@ -247,7 +266,9 @@
 						address: document.getElementById('address')?.value || '',
 						website_url: document.getElementById('website_url')?.value || '',
 						latitude: document.getElementById('latitude')?.value || '',
-						longitude: document.getElementById('longitude')?.value || ''
+						longitude: document.getElementById('longitude')?.value || '',
+						is_personal_photos: document.getElementById('is_personal_photos')?.checked || false,
+						photo_source: document.getElementById('photo_source')?.value || ''
 					};
 					try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch (_) {}
 				}
@@ -261,6 +282,11 @@
 						if (d.category_id) document.getElementById('category_id').value = d.category_id;
 						if (d.address) document.getElementById('address').value = d.address;
 						if (d.website_url) document.getElementById('website_url').value = d.website_url;
+						if (d.is_personal_photos !== undefined) {
+							document.getElementById('is_personal_photos').checked = d.is_personal_photos;
+							document.getElementById('is_personal_photos').dispatchEvent(new Event('change'));
+						}
+						if (d.photo_source) document.getElementById('photo_source').value = d.photo_source;
 						if (d.latitude && d.longitude) {
 							document.getElementById('latitude').value = d.latitude;
 							document.getElementById('longitude').value = d.longitude;
@@ -274,10 +300,14 @@
 						}
 					} catch (_) {}
 				}
-				['title','category_id','address','website_url','latitude','longitude'].forEach(id => {
+				['title','category_id','address','website_url','photo_source','latitude','longitude'].forEach(id => {
 					const elx = document.getElementById(id);
 					if (elx) elx.addEventListener('input', saveDraft);
 				});
+				const personalPhotosCheckbox = document.getElementById('is_personal_photos');
+				if (personalPhotosCheckbox) {
+					personalPhotosCheckbox.addEventListener('change', saveDraft);
+				}
 				const latManual = document.getElementById('latitude_input_edit_{{ $post->id }}');
 				const lngManual = document.getElementById('longitude_input_edit_{{ $post->id }}');
 				if (latManual) latManual.addEventListener('input', saveDraft);
@@ -384,6 +414,29 @@
 					});
 				}
 			});
+
+			// Обработка чекбокса "личные фотографии"
+			(function() {
+				const checkbox = document.getElementById('is_personal_photos');
+				const wrapper = document.getElementById('photo_source_wrapper');
+				const input = document.getElementById('photo_source');
+				
+				function togglePhotoSource() {
+					if (checkbox.checked) {
+						wrapper.style.display = 'none';
+						input.removeAttribute('required');
+						input.value = '';
+					} else {
+						wrapper.style.display = 'block';
+						input.setAttribute('required', 'required');
+					}
+				}
+				
+				if (checkbox && wrapper && input) {
+					checkbox.addEventListener('change', togglePhotoSource);
+					togglePhotoSource(); // Инициализация при загрузке
+				}
+			})();
 
 			// Photos management: existing + new uploads
 			setTimeout(function() {
