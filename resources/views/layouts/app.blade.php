@@ -131,7 +131,12 @@
             <hr class="my-4">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; {{ date('Y') }} Отдых в Карелии. Все права защищены.</p>
+                    <p class="mb-0">
+                        &copy; {{ date('Y') }} Отдых в Карелии. Все права защищены.
+                        <a href="{{ route('privacy.policy') }}" class="text-light text-decoration-none ms-2">
+                            Политика конфиденциальности
+                        </a>
+                    </p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <small class="text-white">
@@ -162,5 +167,136 @@
     
     <!-- Additional JS -->
     @stack('scripts')
+
+    <!-- Cookie Banner -->
+    <div id="cookie-banner" class="cookie-banner" style="display:none;">
+        <div class="cookie-banner__content">
+            <span class="cookie-banner__text">
+                Мы используем файлы cookies и обезличенные данные об использовании сайта для улучшения работы сервиса.
+                Продолжая пользоваться сайтом, вы соглашаетесь с
+                <a href="{{ route('privacy.policy') }}" class="cookie-banner__link">Политикой конфиденциальности</a>.
+            </span>
+            <button type="button" id="cookie-banner-accept" class="cookie-banner__button">
+                Понятно
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var bannerId = 'cookie-banner';
+            var acceptId = 'cookie-banner-accept';
+            var storageKey = 'hk_cookie_banner_accepted';
+
+            function hideBanner() {
+                var banner = document.getElementById(bannerId);
+                if (banner) {
+                    banner.style.display = 'none';
+                }
+            }
+
+            function showBanner() {
+                var banner = document.getElementById(bannerId);
+                if (banner) {
+                    banner.style.display = 'block';
+                }
+            }
+
+            function initCookieBanner() {
+                try {
+                    if (localStorage.getItem(storageKey) === '1') {
+                        return;
+                    }
+                } catch (e) {
+                    // если localStorage недоступен — просто показываем баннер
+                }
+
+                showBanner();
+
+                var btn = document.getElementById(acceptId);
+                if (btn) {
+                    btn.addEventListener('click', function () {
+                        try {
+                            localStorage.setItem(storageKey, '1');
+                        } catch (e) {
+                            // игнорируем ошибки
+                        }
+                        hideBanner();
+                    });
+                }
+            }
+
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                initCookieBanner();
+            } else {
+                document.addEventListener('DOMContentLoaded', initCookieBanner);
+            }
+        })();
+    </script>
+
+    <style>
+        .cookie-banner {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.88);
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+
+        .cookie-banner__content {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .cookie-banner__text {
+            line-height: 1.4;
+        }
+
+        .cookie-banner__link {
+            color: #4ea3ff;
+            text-decoration: underline;
+        }
+
+        .cookie-banner__link:hover {
+            color: #6bb3ff;
+        }
+
+        .cookie-banner__button {
+            background: #4ea3ff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+
+        .cookie-banner__button:hover {
+            background: #2f7ed8;
+        }
+
+        @media (max-width: 768px) {
+            .cookie-banner__content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cookie-banner__button {
+                width: 100%;
+                margin-top: 8px;
+            }
+        }
+    </style>
 </body>
 </html>
