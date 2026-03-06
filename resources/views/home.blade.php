@@ -27,7 +27,7 @@
 						<a href="{{ route('posts.index', ['category' => 'mesta-otdykha']) }}" class="btn btn-primary">
 							<i class="fas fa-campground me-2"></i>Места отдыха
 						</a>
-						<a href="{{ route('posts.index') }}" class="btn btn-outline-light">
+						<a href="{{ route('posts.index') }}" class="btn btn-light">
 							<i class="fas fa-list me-2"></i>Все посты
 						</a>
 					</div>
