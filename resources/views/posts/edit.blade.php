@@ -48,6 +48,26 @@
 								@enderror
 							</div>
 
+							<div class="mb-3">
+								<label for="tags" class="form-label">
+									<i class="fas fa-tags me-1"></i>Теги
+								</label>
+								<input
+									type="text"
+									name="tags"
+									id="tags"
+									class="form-control @error('tags') is-invalid @enderror"
+									value="{{ old('tags', $post->tags->pluck('name')->implode(', ')) }}"
+									placeholder="Например: водопады, зима, семейный отдых"
+								>
+								<div class="form-text">
+									Введите теги через запятую. Не более 10 тегов, каждый до 30 символов.
+								</div>
+								@error('tags')
+									<div class="invalid-feedback">{{ $message }}</div>
+								@enderror
+							</div>
+
 							<div class="row g-3">
 								<div class="col-md-6">
 									<label for="category_id" class="form-label">Категория</label>
@@ -185,6 +205,7 @@
 
 	@push('styles')
 		<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
 		<style>
 			.photo-preview-card {
 				transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -233,6 +254,7 @@
 	@push('scripts')
 		<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 		<script src="{{ asset('js/photo-preview.js') }}"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 		<script>
 			// WYSIWYG (Quill) -> hidden textarea binding
 			(function(){
@@ -553,6 +575,66 @@
 				
 				console.log('📷 === ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
 			}, 2000);
+
+			// Теги: Tagify + AJAX‑подсказки
+			(function () {
+				const input = document.querySelector('input[name="tags"]');
+				if (!input) return;
+
+				const tagify = new Tagify(input, {
+					maxTags: 10,
+					originalInputValueFormat(valuesArr) {
+						return valuesArr.map(item => item.value).join(', ');
+					},
+					dropdown: {
+						enabled: 0,
+						maxItems: 10,
+						closeOnSelect: false,
+						classname: 'tags-dropdown',
+						highlightFirst: true,
+					},
+				});
+
+				let controller = null;
+
+				tagify.on('input', function (e) {
+					const value = e.detail.value || '';
+
+					if (value.length < 2) {
+						tagify.settings.whitelist = [];
+						tagify.dropdown.hide();
+						return;
+					}
+
+					if (controller) controller.abort();
+					controller = new AbortController();
+
+					fetch("{{ route('tags.suggest') }}?q=" + encodeURIComponent(value), {
+						signal: controller.signal,
+						headers: {
+							'X-Requested-With': 'XMLHttpRequest',
+						},
+					})
+						.then(res => res.json())
+						.then(data => {
+							tagify.settings.whitelist = data;
+							tagify.dropdown.show.call(tagify, value);
+						})
+						.catch(err => {
+							if (err.name === 'AbortError') return;
+							console.error('Tagify suggest error', err);
+						});
+				});
+
+				tagify.on('add', function (e) {
+					const maxLength = 30;
+					const val = e.detail.data.value || '';
+					if (val.length > maxLength) {
+						tagify.removeTag(e.detail.tag);
+						alert('Тег "' + val + '" слишком длинный. Максимум ' + maxLength + ' символов.');
+					}
+				});
+			})();
 
 
 		</script>

@@ -8,16 +8,18 @@
 	<div class="container my-5">
 		<!-- Hero Section -->
 		<div class="hero-section rounded-4 p-5 mb-5" style="
-			background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.3)), 
-						url('{{ asset('images/hero-background.jpg') }}') center/cover;
+			background:
+				linear-gradient(to right, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.25) 48%, rgba(0, 0, 0, 0) 72%),
+				linear-gradient(rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.25)),
+				url('{{ asset('images/hero-background.jpg') }}') center/cover;
 			min-height: 500px;
 		">
 			<div class="row align-items-center h-100">
 				<div class="col-lg-7 mb-4 mb-lg-0">
-					<h1 class="hero-title fw-bold mb-3 text-white">
+					<h1 class="hero-title fw-bold mb-3 text-white" style="text-shadow: 0 3px 12px rgba(0, 0, 0, 0.65), 0 0 28px rgba(0, 0, 0, 0.35);">
 						Карелия: ваш идеальный отпуск начинается здесь
 					</h1>
-					<p class="lead text-white mb-4" style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); font-weight: 500;">
+					<p class="lead text-white mb-4" style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65); font-weight: 500;">
 						Забудьте о скучных путеводителях! Наш сайт — это живой гид по самым удивительным местам Карелии. Откройте для себя скрытые жемчужины, спланируйте маршрут мечты и получите незабываемые впечатления.
 					</p>
 					<div class="d-flex flex-wrap gap-2 mb-3">

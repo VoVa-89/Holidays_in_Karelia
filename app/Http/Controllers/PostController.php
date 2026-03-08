@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\PostPhoto;
+use App\Models\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /**
@@ -37,7 +39,7 @@ final class PostController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Post::with(['user', 'category', 'photos'])
+        $query = Post::with(['user', 'category', 'photos', 'tags'])
             ->where('status', 'published');
 
         // Фильтрация по категории (поддержка id или slug)
@@ -51,6 +53,15 @@ final class PostController extends Controller
             if ($category) {
                 $query->where('category_id', $category->id);
             }
+        }
+
+        // Фильтрация по тегу: /posts?tag=slug
+        if ($request->filled('tag')) {
+            $tagSlug = (string) $request->get('tag');
+
+            $query->whereHas('tags', function ($q) use ($tagSlug): void {
+                $q->where('slug', $tagSlug);
+            });
         }
 
         // Поиск по заголовку
@@ -118,6 +129,7 @@ final class PostController extends Controller
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'website_url' => 'nullable|url|max:255',
+            'tags' => 'nullable|string|max:255',
             'is_personal_photos' => 'nullable|boolean',
             'photo_source' => 'nullable|url|max:255|required_without:is_personal_photos',
             'status' => 'in:' . implode(',', Post::STATUSES),
@@ -180,7 +192,10 @@ final class PostController extends Controller
 
                 return $post;
             });
-            
+
+            // Обновляем теги после успешного создания поста
+            $this->syncTags($post, $request->input('tags'));
+
             Log::info('Пост успешно создан', [
                 'post_id' => $post->id,
                 'title' => $post->title,
@@ -261,6 +276,7 @@ final class PostController extends Controller
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'website_url' => 'nullable|url|max:255',
+            'tags' => 'nullable|string|max:255',
             'is_personal_photos' => 'nullable|boolean',
             'photo_source' => 'nullable|url|max:255|required_without:is_personal_photos',
             'status' => 'in:' . implode(',', Post::STATUSES),
@@ -319,7 +335,7 @@ final class PostController extends Controller
             $validated['photo_source'] = null;
         }
 
-        DB::transaction(function () use ($post, $validated, $request) {
+        DB::transaction(function () use ($post, $validated, $request): void {
             $post->update($validated);
 
             // Обработка удаленных фотографий
@@ -341,6 +357,9 @@ final class PostController extends Controller
                 $this->updateMainPhoto($post, $request->get('main_index'));
             }
         });
+
+        // Обновляем теги после успешного обновления поста
+        $this->syncTags($post, $request->input('tags'));
 
         return redirect()
             ->route('posts.show', $post->slug)
@@ -541,5 +560,54 @@ final class PostController extends Controller
             'post_id' => $post->id,
             'photo_id' => $photoId
         ]);
+    }
+
+    /**
+     * Синхронизация тегов поста на основе строки из формы
+     */
+    private function syncTags(Post $post, ?string $tagsString): void
+    {
+        $maxTagsPerPost = 10;
+        $maxTagLength = 30;
+
+        if ($tagsString === null || trim($tagsString) === '') {
+            $post->tags()->sync([]);
+            return;
+        }
+
+        $names = collect(explode(',', $tagsString))
+            ->map(static fn (string $item): string => trim($item))
+            ->filter()
+            ->unique();
+
+        if ($names->count() > $maxTagsPerPost) {
+            throw ValidationException::withMessages([
+                'tags' => "Максимум {$maxTagsPerPost} тегов для одного поста.",
+            ]);
+        }
+
+        $tooLong = $names->first(
+            static fn (string $name): bool => mb_strlen($name) > $maxTagLength
+        );
+
+        if ($tooLong !== null) {
+            throw ValidationException::withMessages([
+                'tags' => "Тег «{$tooLong}» слишком длинный. Максимум {$maxTagLength} символов.",
+            ]);
+        }
+
+        $tagIds = $names->map(function (string $name): int {
+            $normalizedName = mb_convert_case($name, MB_CASE_TITLE, 'UTF-8');
+            $slug = Str::slug($name, '-');
+
+            $tag = Tag::firstOrCreate(
+                ['slug' => $slug],
+                ['name' => $normalizedName]
+            );
+
+            return $tag->id;
+        })->all();
+
+        $post->tags()->sync($tagIds);
     }
 }

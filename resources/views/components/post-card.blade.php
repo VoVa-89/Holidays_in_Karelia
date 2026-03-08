@@ -47,6 +47,18 @@
 			{{ Str::limit(strip_tags($post->description), 120) }}
 		</p>
 
+		{{-- Теги поста --}}
+		@if($post->tags && $post->tags->isNotEmpty())
+			<div class="post-card-tags">
+				@foreach($post->tags as $tag)
+					<a href="{{ route('posts.index', array_merge(request()->except(['page', 'tag']), ['tag' => $tag->slug])) }}"
+					   class="tag-badge tag-badge--post-card {{ request('tag') === $tag->slug ? 'tag-badge--active' : '' }}">
+						<i class="fas fa-tag"></i>{{ $tag->name }}
+					</a>
+				@endforeach
+			</div>
+		@endif
+
 		<!-- Мета-информация -->
 		<div class="card-meta mt-auto">
 			<div class="row g-2 align-items-center">
@@ -177,6 +189,13 @@
 	
 	.post-card .rating-stars i {
 		font-size: 0.875rem;
+	}
+
+	/* Теги поверх stretched-link, чтобы клик вёл на фильтр по тегу */
+	.post-card-tags,
+	.post-card-tags .tag-badge {
+		position: relative;
+		z-index: 1;
 	}
 	
 	/* Адаптивность */

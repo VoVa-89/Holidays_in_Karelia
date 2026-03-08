@@ -8,6 +8,7 @@ use App\Http\Controllers\MyPostsController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,9 @@ Route::middleware('throttle:60,1')->group(function () {
 Route::view('/guidelines', 'pages.guidelines')->name('guidelines');
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
+
+// AJAX‑подсказки по тегам
+Route::get('/tags/suggest', [TagController::class, 'suggest'])->name('tags.suggest');
 
 // Маршруты для постов
 Route::prefix('posts')->name('posts.')->group(function () {

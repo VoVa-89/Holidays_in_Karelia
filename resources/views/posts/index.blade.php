@@ -41,6 +41,22 @@
 			</div>
 		</form>
 
+		@if(request('tag'))
+			<div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+				<div>
+					<i class="fas fa-filter me-2"></i>
+					Показаны посты с тегом:
+					<span class="badge bg-primary">
+						{{ request('tag') }}
+					</span>
+				</div>
+				<a href="{{ route('posts.index', request()->except(['tag', 'page'])) }}"
+				   class="btn btn-primary">
+					<i class="fas fa-times me-1"></i>Сбросить фильтр по тегу
+				</a>
+			</div>
+		@endif
+
 		@if($posts->count() === 0)
 			<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>По вашему запросу ничего не найдено.</div>
 		@else
