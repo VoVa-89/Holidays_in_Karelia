@@ -48,9 +48,9 @@
 									<h6 class="card-title text-success mb-2">
 										<i class="fas fa-landmark me-2"></i>Достопримечательности
 									</h6>
-									<p class="card-text small text-muted mb-0">
-										Уникальные природные и рукотворные объекты, представляющие культурную, историческую или природную ценность. Места, которые стоит посетить для знакомства с наследием и красотой Карелии.
-									</p>
+								<p class="card-text mb-0" style="color: #333; font-size: 0.875rem; line-height: 1.55;">
+									Уникальные природные и рукотворные объекты, представляющие культурную, историческую или природную ценность. Места, которые стоит посетить для знакомства с наследием и красотой Карелии.
+								</p>
 								</div>
 							</div>
 						</div>
@@ -66,9 +66,9 @@
 									<h6 class="card-title text-primary mb-2">
 										<i class="fas fa-campground me-2"></i>Места отдыха
 									</h6>
-									<p class="card-text small text-muted mb-0">
-										Объекты инфраструктуры и локации, созданные для комфортного проведения досуга. Места, где можно остановиться, отдохнуть и получить услуги для полноценного отдыха в Карелии.
-									</p>
+								<p class="card-text mb-0" style="color: #333; font-size: 0.875rem; line-height: 1.55;">
+									Объекты инфраструктуры и локации, созданные для комфортного проведения досуга. Места, где можно остановиться, отдохнуть и получить услуги для полноценного отдыха в Карелии.
+								</p>
 								</div>
 							</div>
 						</div>
@@ -86,8 +86,14 @@
 							<h5 class="card-title mb-3"><i class="fas fa-bullhorn me-2"></i>Добро пожаловать!</h5>
 							@guest
 								<p class="mb-3">Создайте аккаунт, чтобы добавлять места, оставлять комментарии и ставить оценки.</p>
-								<a href="{{ route('register') }}" class="btn btn-success me-2"><i class="fas fa-user-plus me-2"></i>Регистрация</a>
-								<a href="{{ route('login') }}" class="btn btn-outline-secondary"><i class="fas fa-sign-in-alt me-2"></i>Войти</a>
+								<div class="d-flex flex-wrap gap-2">
+									<a href="{{ route('register') }}" class="btn btn-success me-1">
+										<i class="fas fa-user-plus me-2"></i>Регистрация
+									</a>
+									<a href="{{ route('login') }}" class="btn btn-primary">
+										<i class="fas fa-sign-in-alt me-2"></i>Войти
+									</a>
+								</div>
 							@else
 								<p class="mb-3">Вы вошли как <strong>{{ Auth::user()->name }}</strong>. Делитесь любимыми местами Карелии!</p>
 								<a href="{{ route('posts.create') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Добавить пост</a>

@@ -117,13 +117,13 @@
 			<ul class="navbar-nav">
 				@guest
 					<!-- Кнопки для неавторизованных пользователей -->
-					<li class="nav-item">
-						<a class="nav-link" href="{{ route('login') }}">
+					<li class="nav-item me-2">
+						<a class="btn btn-primary btn-sm" href="{{ route('login') }}">
 							<i class="fas fa-sign-in-alt me-1"></i>Войти
 						</a>
 					</li>
 					<li class="nav-item">
-						<a class="btn btn-primary btn-sm ms-2" href="{{ route('register') }}">
+						<a class="btn btn-success btn-sm" href="{{ route('register') }}">
 							<i class="fas fa-user-plus me-1"></i>Регистрация
 						</a>
 					</li>

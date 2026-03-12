@@ -765,6 +765,16 @@ textarea.form-control {
     box-shadow: var(--k-shadow-md);
 }
 
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--k-shadow-md);
+}
+
+.btn-light:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--k-shadow-md);
+}
+
 /* CTA кнопка для создания поста */
 .btn-cta {
     background: var(--k-gradient-water);

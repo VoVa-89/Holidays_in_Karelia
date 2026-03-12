@@ -842,7 +842,23 @@
     flex-wrap: wrap;
     gap: 4px;
 }
+
+/* ===== HERO-КНОПКИ НА ГЛАВНОЙ ===== */
+.hero-section .btn-success,
+.hero-section .btn-primary,
+.hero-section .btn-light {
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease !important;
 }
+
+.hero-section .btn-success:hover,
+.hero-section .btn-primary:hover,
+.hero-section .btn-light:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18) !important;
+}
+
 
 
 
