@@ -107,6 +107,28 @@
 			</div>
 		</div>
 
+		<!-- Топ постов по категориям -->
+		<div class="row g-4 mb-5">
+			<div class="col-12 col-xl-6">
+				<x-top-posts-list
+					title="Популярные достопримечательности"
+					:posts="$topAttractions"
+					icon="fas fa-landmark"
+					colorClass="success"
+					categorySlug="dostoprimechatelnosti"
+				/>
+			</div>
+			<div class="col-12 col-xl-6">
+				<x-top-posts-list
+					title="Лучшие места для отдыха"
+					:posts="$topRestPlaces"
+					icon="fas fa-campground"
+					colorClass="primary"
+					categorySlug="mesta-otdykha"
+				/>
+			</div>
+		</div>
+
 		<!-- Компонент карты -->
 		<x-main-map :posts="$mapPosts" />
 

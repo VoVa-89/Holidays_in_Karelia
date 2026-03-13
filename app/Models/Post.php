@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -111,6 +112,14 @@ final class Post extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(PostPhoto::class);
+    }
+
+    /**
+     * Получить одно фото для превью: приоритетно главное, иначе первое по порядку
+     */
+    public function mainPhoto(): HasOne
+    {
+        return $this->hasOne(PostPhoto::class)->orderByDesc('is_main')->orderBy('order');
     }
 
     /**

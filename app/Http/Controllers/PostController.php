@@ -187,7 +187,7 @@ final class PostController extends Controller
 
                 // Обработка загруженных фотографий
                 if ($request->hasFile('photos')) {
-                    $this->handlePhotoUploads($post, $request->file('photos'), $request->get('main_index', 0));
+                    $this->handlePhotoUploads($post, $request->file('photos'), $request->get('main_index') ?? 0);
                 }
 
                 return $post;
@@ -345,7 +345,7 @@ final class PostController extends Controller
 
             // Обработка новых загруженных фотографий
             if ($request->hasFile('photos')) {
-                $this->handlePhotoUploads($post, $request->file('photos'), $request->get('main_index', 0));
+                $this->handlePhotoUploads($post, $request->file('photos'), $request->get('main_index') ?? 0);
             }
 
             // Обновление основной фотографии среди существующих (приоритет выше)

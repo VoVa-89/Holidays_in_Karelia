@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Post;
+use App\Observers\PostObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
@@ -26,5 +28,7 @@ class AppServiceProvider extends ServiceProvider
         if (App::environment('local')) {
             Config::set('mail.default', 'log');
         }
+
+        Post::observe(PostObserver::class);
     }
 }
