@@ -16,9 +16,9 @@
 						@php
 							$current = request('category');
 						@endphp
-						<a href="{{ route('posts.index', request()->except(['page', 'category', 'search'])) }}" class="btn btn-outline-secondary {{ !$current ? 'active' : '' }}">Все посты</a>
-						<a href="{{ route('posts.index', array_merge(request()->except(['page', 'search']), ['category' => 'dostoprimechatelnosti'])) }}" class="btn btn-outline-primary {{ $current === 'dostoprimechatelnosti' ? 'active' : '' }}">Достопримечательности</a>
-						<a href="{{ route('posts.index', array_merge(request()->except(['page', 'search']), ['category' => 'mesta-otdykha'])) }}" class="btn btn-outline-primary {{ $current === 'mesta-otdykha' ? 'active' : '' }}">Места отдыха</a>
+						<a href="{{ route('posts.index', array_merge(request()->except(['page', 'search']), ['category' => 'dostoprimechatelnosti'])) }}" class="btn btn-success {{ $current === 'dostoprimechatelnosti' ? 'active' : '' }}"><i class="fas fa-landmark me-2"></i>Достопримечательности</a>
+						<a href="{{ route('posts.index', array_merge(request()->except(['page', 'search']), ['category' => 'mesta-otdykha'])) }}" class="btn btn-primary {{ $current === 'mesta-otdykha' ? 'active' : '' }}"><i class="fas fa-campground me-2"></i>Места отдыха</a>
+						<a href="{{ route('posts.index', request()->except(['page', 'category', 'search'])) }}" class="btn btn-yellow {{ !$current ? 'active' : '' }}"><i class="fas fa-list me-2"></i>Все посты</a>
 						</div>
 					</div>
 					<div class="col-md-4">

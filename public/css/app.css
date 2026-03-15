@@ -45,10 +45,15 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.4;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
     color: var(--text-dark);
     background-color: #F5F2ED;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Raleway', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.25;
 }
 
 /* ===== КАРТОЧКИ ПОСТОВ ===== */
@@ -771,6 +776,21 @@ textarea.form-control {
 }
 
 .btn-light:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--k-shadow-md);
+}
+
+.btn-yellow {
+    background-color: #fffacd !important;
+    border-color: #e6c800 !important;
+    color: #333;
+    transition: var(--transition);
+}
+
+.btn-yellow:hover {
+    background-color: #fff176;
+    border-color: #c8a800;
+    color: #333;
     transform: translateY(-2px);
     box-shadow: var(--k-shadow-md);
 }

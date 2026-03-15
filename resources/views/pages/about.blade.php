@@ -79,14 +79,14 @@
                             Найдите идеальное место для отдыха и начните планировать свое путешествие!
                         </h3>
                         <div class="d-flex flex-wrap gap-2 justify-content-center">
-                            <a href="{{ route('posts.index') }}" class="btn btn-success btn-lg">
-                                <i class="fas fa-list me-2"></i>Все посты
-                            </a>
-                            <a href="{{ route('posts.index', ['category' => 'dostoprimechatelnosti']) }}" class="btn btn-primary btn-lg">
+                            <a href="{{ route('posts.index', ['category' => 'dostoprimechatelnosti']) }}" class="btn btn-success btn-lg">
                                 <i class="fas fa-landmark me-2"></i>Достопримечательности
                             </a>
-                            <a href="{{ route('posts.index', ['category' => 'mesta-otdykha']) }}" class="btn btn-outline-primary btn-lg">
+                            <a href="{{ route('posts.index', ['category' => 'mesta-otdykha']) }}" class="btn btn-primary btn-lg">
                                 <i class="fas fa-campground me-2"></i>Места отдыха
+                            </a>
+                            <a href="{{ route('posts.index') }}" class="btn btn-yellow btn-lg">
+                                <i class="fas fa-list me-2"></i>Все посты
                             </a>
                         </div>
                     </div>

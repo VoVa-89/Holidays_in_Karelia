@@ -24,6 +24,11 @@
     <meta name="twitter:description" content="@yield('og:description', 'Забудьте о скучных путеводителях! Наш сайт — это живой гид по самым удивительным местам Карелии. Откройте для себя скрытые жемчужины, спланируйте маршрут мечты и получите незабываемые впечатления.')">
     <meta name="twitter:image" content="@yield('og:image', asset('images/og-image.jpg'))">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -132,8 +137,8 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <p class="mb-0">
-                        &copy; {{ date('Y') }} Отдых в Карелии. Все права защищены.
-                        <a href="{{ route('privacy.policy') }}" class="text-light text-decoration-none ms-2">
+                        &copy; {{ date('Y') }} Отдых в Карелии. Все права защищены.<br>
+                        <a href="{{ route('privacy.policy') }}" class="text-light text-decoration-none">
                             Политика конфиденциальности
                         </a>
                     </p>

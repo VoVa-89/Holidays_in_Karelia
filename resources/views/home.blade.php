@@ -29,7 +29,7 @@
 						<a href="{{ route('posts.index', ['category' => 'mesta-otdykha']) }}" class="btn btn-primary">
 							<i class="fas fa-campground me-2"></i>Места отдыха
 						</a>
-						<a href="{{ route('posts.index') }}" class="btn btn-light">
+						<a href="{{ route('posts.index') }}" class="btn btn-yellow">
 							<i class="fas fa-list me-2"></i>Все посты
 						</a>
 					</div>
@@ -37,40 +37,40 @@
 					<!-- Описания категорий -->
 					<div class="row g-3">
 						<div class="col-md-6">
-							<div class="card border-success h-100" style="
-								background: rgba(255, 255, 255, 0.5) !important; 
-								backdrop-filter: blur(30px) !important;
-								-webkit-backdrop-filter: blur(30px) !important;
-								border: 2px solid rgba(255, 255, 255, 0.6) !important;
-								box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
-							">
-								<div class="card-body">
-									<h6 class="card-title text-success mb-2">
-										<i class="fas fa-landmark me-2"></i>Достопримечательности
-									</h6>
-								<p class="card-text mb-0" style="color: #333; font-size: 0.875rem; line-height: 1.55;">
-									Уникальные природные и рукотворные объекты, представляющие культурную, историческую или природную ценность. Места, которые стоит посетить для знакомства с наследием и красотой Карелии.
-								</p>
-								</div>
+						<div class="card border-success h-100" style="
+							background: rgba(255, 255, 255, 0.5) !important; 
+							backdrop-filter: blur(30px) !important;
+							-webkit-backdrop-filter: blur(30px) !important;
+							border: 2px solid rgba(255, 255, 255, 0.6) !important;
+							box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+						">
+							<div class="card-body">
+								<h6 class="card-title text-success mb-2 fw-bold">
+									<i class="fas fa-landmark me-2"></i>Достопримечательности
+								</h6>
+							<p class="card-text mb-0" style="color: #333; font-size: 0.875rem; line-height: 1.55;">
+								Уникальные природные и рукотворные объекты, представляющие культурную, историческую или природную ценность. Места, которые стоит посетить для знакомства с наследием и красотой Карелии.
+							</p>
 							</div>
 						</div>
+						</div>
 						<div class="col-md-6">
-							<div class="card border-primary h-100" style="
-								background: rgba(255, 255, 255, 0.5) !important; 
-								backdrop-filter: blur(30px) !important;
-								-webkit-backdrop-filter: blur(30px) !important;
-								border: 2px solid rgba(255, 255, 255, 0.6) !important;
-								box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
-							">
-								<div class="card-body">
-									<h6 class="card-title text-primary mb-2">
-										<i class="fas fa-campground me-2"></i>Места отдыха
-									</h6>
-								<p class="card-text mb-0" style="color: #333; font-size: 0.875rem; line-height: 1.55;">
-									Объекты инфраструктуры и локации, созданные для комфортного проведения досуга. Места, где можно остановиться, отдохнуть и получить услуги для полноценного отдыха в Карелии.
-								</p>
-								</div>
+						<div class="card border-primary h-100" style="
+							background: rgba(255, 255, 255, 0.5) !important; 
+							backdrop-filter: blur(30px) !important;
+							-webkit-backdrop-filter: blur(30px) !important;
+							border: 2px solid rgba(255, 255, 255, 0.6) !important;
+							box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+						">
+							<div class="card-body">
+								<h6 class="card-title text-primary mb-2 fw-bold">
+									<i class="fas fa-campground me-2"></i>Места отдыха
+								</h6>
+							<p class="card-text mb-0" style="color: #333; font-size: 0.875rem; line-height: 1.55;">
+								Объекты инфраструктуры и локации, созданные для комфортного проведения досуга. Места, где можно остановиться, отдохнуть и получить услуги для полноценного отдыха в Карелии.
+							</p>
 							</div>
+						</div>
 						</div>
 					</div>
 				</div>
