@@ -39,7 +39,7 @@ final class PostController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Post::with(['user', 'category', 'photos', 'tags'])
+        $query = Post::with(['user', 'category', 'photos', 'mainPhoto', 'tags'])
             ->where('status', 'published');
 
         // Фильтрация по категории (поддержка id или slug)

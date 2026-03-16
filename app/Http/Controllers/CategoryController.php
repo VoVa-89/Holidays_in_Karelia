@@ -87,7 +87,7 @@ final class CategoryController extends Controller
 
         $posts = $category->posts()
             ->where('status', 'published')
-            ->with(['user', 'photos'])
+            ->with(['user', 'photos', 'mainPhoto', 'tags'])
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 

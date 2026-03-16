@@ -3,11 +3,11 @@
 <div class="card h-100 shadow-sm post-card">
 	<!-- Изображение поста -->
 	<div class="card-img-container position-relative">
-		@if($post->photos && $post->photos->count() > 0)
-			<img src="{{ asset($post->photos->first()->photo_path) }}" 
-				 class="card-img-top" 
-				 alt="{{ $post->title }}"
-				 style="height: 200px; object-fit: cover;">
+	@if($post->mainPhoto)
+		<img src="{{ asset($post->mainPhoto->photo_path) }}" 
+			 class="card-img-top" 
+			 alt="{{ $post->title }}"
+			 style="height: 200px; object-fit: cover;">
 		@else
 			<div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
 				 style="height: 200px;">

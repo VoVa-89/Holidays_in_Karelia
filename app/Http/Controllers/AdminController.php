@@ -150,7 +150,7 @@ final class AdminController extends Controller
      */
     public function moderation(Request $request): View
     {
-        $query = Post::with(['user', 'category'])
+        $query = Post::with(['user', 'category', 'mainPhoto'])
             ->where('status', 'moderation')
             ->orderBy('created_at', 'desc');
 
