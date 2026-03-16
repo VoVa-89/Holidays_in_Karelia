@@ -425,42 +425,42 @@
 				}
 			}
 
-			// Функция геокодирования адреса
-			function geocodeAddress(address, callback) {
-				if (!address || address.trim() === '') {
-					showGeocodeStatus('Введите адрес для поиска', 'warning');
+		// Функция геокодирования адреса
+		// updateField=true только при явном нажатии кнопки или Enter
+		function geocodeAddress(address, callback, updateField = false) {
+			if (!address || address.trim() === '') {
+				showGeocodeStatus('Введите адрес для поиска', 'warning');
+				return;
+			}
+
+			showGeocodeStatus('Поиск координат...', 'info');
+
+			ymaps.geocode(address, {
+				results: 1
+			}).then(function(res) {
+				var first = res.geoObjects.get(0);
+				if (!first) {
+					showGeocodeStatus('Адрес не найден. Попробуйте уточнить адрес.', 'danger');
 					return;
 				}
 
-				showGeocodeStatus('Поиск координат...', 'info');
-				
-				ymaps.geocode(address, { 
-					results: 1,
-					kind: 'house'
-				}).then(function(res) {
-					var first = res.geoObjects.get(0);
-					if (!first) {
-						showGeocodeStatus('Адрес не найден. Попробуйте уточнить адрес.', 'danger');
-						return;
-					}
-					
-					var coords = first.geometry.getCoordinates();
-					var foundAddress = first.getAddressLine();
-					
-					// Обновляем поле адреса найденным значением
+				var coords = first.geometry.getCoordinates();
+				var foundAddress = first.getAddressLine();
+
+				// Перезаписываем поле адреса только при явном вызове (кнопка / Enter)
+				if (updateField) {
 					document.getElementById('address').value = foundAddress;
-					
-					// Обновляем карту
-					updateMapCenter(coords);
-					
-					showGeocodeStatus(`Найдено: ${foundAddress}`, 'success');
-					
-					if (callback) callback(coords, foundAddress);
-				}).catch(function(error) {
-					console.error('Ошибка геокодирования:', error);
-					showGeocodeStatus('Ошибка при поиске адреса', 'danger');
-				});
-			}
+				}
+
+				updateMapCenter(coords);
+				showGeocodeStatus(`Найдено: ${foundAddress}`, 'success');
+
+				if (callback) callback(coords, foundAddress);
+			}).catch(function(error) {
+				console.error('Ошибка геокодирования:', error);
+				showGeocodeStatus('Ошибка при поиске адреса', 'danger');
+			});
+		}
 
 			// Функция показа статуса геокодирования
 			function showGeocodeStatus(message, type) {
@@ -473,30 +473,30 @@
 				}, 5000);
 			}
 
-			// Обработчик кнопки геокодирования
-			document.getElementById('geocode-btn').addEventListener('click', function() {
-				const address = document.getElementById('address').value.trim();
-				geocodeAddress(address);
-			});
+		// Обработчик кнопки геокодирования — явный вызов, перезаписываем поле
+		document.getElementById('geocode-btn').addEventListener('click', function() {
+			const address = document.getElementById('address').value.trim();
+			geocodeAddress(address, null, true);
+		});
 
-			// Обработчик Enter в поле адреса
-			document.getElementById('address').addEventListener('keypress', function(e) {
-				if (e.key === 'Enter') {
-					e.preventDefault();
-					geocodeAddress(this.value.trim());
+		// Обработчик Enter в поле адреса — явный вызов, перезаписываем поле
+		document.getElementById('address').addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				geocodeAddress(this.value.trim(), null, true);
+			}
+		});
+
+		// Автогеокодирование при вводе — заполняем только координаты, поле не трогаем
+		let geocodeTimeout;
+		document.getElementById('address').addEventListener('input', function() {
+			clearTimeout(geocodeTimeout);
+			geocodeTimeout = setTimeout(() => {
+				if (this.value.trim().length >= 20) { // порог 20 символов — адрес должен быть осмысленным
+					geocodeAddress(this.value.trim(), null, false);
 				}
-			});
-
-			// Автоматическое геокодирование при изменении адреса (с задержкой)
-			let geocodeTimeout;
-			document.getElementById('address').addEventListener('input', function() {
-				clearTimeout(geocodeTimeout);
-				geocodeTimeout = setTimeout(() => {
-					if (this.value.trim().length > 10) { // Минимум 10 символов для автопоиска
-						geocodeAddress(this.value.trim());
-					}
-				}, 1000); // Задержка 1 секунда
-			});
+			}, 2500); // 2.5 секунды — достаточно для набора длинного адреса
+		});
 
 			// Загружаем API Яндекс.Карт и инициализируем карту
 			loadYandexMapsAPI();

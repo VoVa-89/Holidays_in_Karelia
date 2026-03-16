@@ -151,36 +151,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Автозаполнение координат при вводе адреса
-    const addressInput = document.getElementById('address');
-    if (addressInput) {
-        let geocodeTimeout;
-        addressInput.addEventListener('input', function () {
-            clearTimeout(geocodeTimeout);
-            const address = this.value;
-
-            if (address && address.length > 5) {
-                geocodeTimeout = setTimeout(() => {
-                    loadYandexMaps(function () {
-                        ymaps.ready(function () {
-                            ymaps.geocode(address).then(function (res) {
-                                const firstGeoObject = res.geoObjects.get(0);
-                                if (firstGeoObject) {
-                                    const coords = firstGeoObject.geometry.getCoordinates();
-                                    document.getElementById('latitude').value = coords[0].toFixed(8);
-                                    document.getElementById('longitude').value = coords[1].toFixed(8);
-
-                                    // Обновляем адрес найденным значением
-                                    document.getElementById('address').value = firstGeoObject.getAddressLine();
-                                }
-                            });
-                        });
-                    });
-                }, 1000);
-            }
-        });
-    }
-
     // Экспортируем функцию для использования в других скриптах
     window.loadYandexMaps = loadYandexMaps;
 });
