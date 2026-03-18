@@ -35,6 +35,46 @@
 			</div>
 		@endif
 	</div>
+@push('schema')
+@php
+$catSchema = [
+    '@context'    => 'https://schema.org',
+    '@type'       => 'CollectionPage',
+    'name'        => $category->name . ' — Отдых в Карелии',
+    'description' => $category->description
+        ?: ('Публикации в категории ' . $category->name . ' — Отдых в Карелии'),
+    'url'         => route('categories.show', $category->slug),
+    'inLanguage'  => 'ru-RU',
+    'isPartOf'    => [
+        '@type' => 'WebSite',
+        'name'  => 'Отдых в Карелии',
+        'url'   => url('/'),
+    ],
+];
+
+$catBreadcrumb = [
+    '@context' => 'https://schema.org',
+    '@type'    => 'BreadcrumbList',
+    'itemListElement' => [
+        [
+            '@type'    => 'ListItem',
+            'position' => 1,
+            'name'     => 'Главная',
+            'item'     => route('home'),
+        ],
+        [
+            '@type'    => 'ListItem',
+            'position' => 2,
+            'name'     => $category->name,
+            'item'     => route('categories.show', $category->slug),
+        ],
+    ],
+];
+@endphp
+<script type="application/ld+json">{!! json_encode($catSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode($catBreadcrumb, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
+
 @endsection
 
 

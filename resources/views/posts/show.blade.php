@@ -404,6 +404,101 @@
 		</style>
 	@endpush
 
+	@push('schema')
+	@php
+	$ratingsCount = $post->ratings->count();
+
+	$postSchema = [
+	    '@context'      => 'https://schema.org',
+	    '@type'         => 'TouristAttraction',
+	    'name'          => $post->title,
+	    'description'   => html_entity_decode(
+	                           strip_tags($post->description),
+	                           ENT_QUOTES | ENT_HTML5,
+	                           'UTF-8'
+	                       ),
+	    'url'           => route('posts.show', $post->slug),
+	    'inLanguage'    => 'ru-RU',
+	    'datePublished' => $post->created_at->toIso8601String(),
+	    'dateModified'  => $post->updated_at->toIso8601String(),
+	    'author'        => [
+	        '@type' => 'Person',
+	        'name'  => $post->user->name,
+	    ],
+	    'isPartOf' => [
+	        '@type' => 'WebSite',
+	        'name'  => 'Отдых в Карелии',
+	        'url'   => url('/'),
+	    ],
+	];
+
+	if ($post->photos->isNotEmpty()) {
+	    $postSchema['image'] = $post->photos
+	        ->map(fn($p) => asset($p->photo_path))
+	        ->values()
+	        ->toArray();
+	}
+
+	if ($post->latitude && $post->longitude) {
+	    $postSchema['geo'] = [
+	        '@type'     => 'GeoCoordinates',
+	        'latitude'  => (float) $post->latitude,
+	        'longitude' => (float) $post->longitude,
+	    ];
+	}
+
+	if ($post->address) {
+	    $postSchema['address'] = [
+	        '@type'           => 'PostalAddress',
+	        'streetAddress'   => $post->address,
+	        'addressRegion'   => 'Республика Карелия',
+	        'addressCountry'  => 'RU',
+	    ];
+	}
+
+	if ($ratingsCount > 0) {
+	    $postSchema['aggregateRating'] = [
+	        '@type'       => 'AggregateRating',
+	        'ratingValue' => round((float) $post->rating, 1),
+	        'reviewCount' => $ratingsCount,
+	        'bestRating'  => 5,
+	        'worstRating' => 1,
+	    ];
+	}
+
+	if ($post->website_url) {
+	    $postSchema['sameAs'] = $post->website_url;
+	}
+
+	$breadcrumbSchema = [
+	    '@context' => 'https://schema.org',
+	    '@type'    => 'BreadcrumbList',
+	    'itemListElement' => [
+	        [
+	            '@type'    => 'ListItem',
+	            'position' => 1,
+	            'name'     => 'Главная',
+	            'item'     => route('home'),
+	        ],
+	        [
+	            '@type'    => 'ListItem',
+	            'position' => 2,
+	            'name'     => $post->category->name,
+	            'item'     => route('categories.show', $post->category->slug),
+	        ],
+	        [
+	            '@type'    => 'ListItem',
+	            'position' => 3,
+	            'name'     => $post->title,
+	            'item'     => route('posts.show', $post->slug),
+	        ],
+	    ],
+	];
+	@endphp
+	<script type="application/ld+json">{!! json_encode($postSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+	<script type="application/ld+json">{!! json_encode($breadcrumbSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+	@endpush
+
 	@push('scripts')
 		<script>
 			// Advanced Gallery System

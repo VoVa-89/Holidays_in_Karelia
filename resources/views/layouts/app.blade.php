@@ -47,6 +47,9 @@
     <!-- Additional CSS -->
     @stack('styles')
     
+    <!-- Schema.org Structured Data -->
+    @stack('schema')
+
     <!-- Yandex Maps Configuration -->
     <meta name="yandex-maps-key" content="{{ config('services.yandex.maps_key') }}">
 </head>

@@ -156,4 +156,48 @@
 		</div>
 	</div>
 
+@push('schema')
+@php
+$websiteSchema = [
+    '@context'   => 'https://schema.org',
+    '@type'      => 'WebSite',
+    'name'       => 'Отдых в Карелии',
+    'url'        => url('/'),
+    'inLanguage' => 'ru-RU',
+    'description' => 'Живой гид по самым удивительным местам Карелии. Достопримечательности, места отдыха, маршруты.',
+    'publisher'  => [
+        '@type' => 'Organization',
+        'name'  => 'Отдых в Карелии',
+        'url'   => url('/'),
+        'logo'  => [
+            '@type' => 'ImageObject',
+            'url'   => asset('images/og-image.jpg'),
+        ],
+        'contactPoint' => [
+            '@type'       => 'ContactPoint',
+            'telephone'   => '+7-921-222-30-98',
+            'email'       => 'krupenkin.vov@yandex.ru',
+            'contactType' => 'customer service',
+            'areaServed'  => 'RU',
+        ],
+        'address' => [
+            '@type'           => 'PostalAddress',
+            'addressLocality' => 'Петрозаводск',
+            'addressRegion'   => 'Республика Карелия',
+            'addressCountry'  => 'RU',
+        ],
+    ],
+    'potentialAction' => [
+        '@type'  => 'SearchAction',
+        'target' => [
+            '@type'       => 'EntryPoint',
+            'urlTemplate' => url('/posts') . '?search={search_term_string}',
+        ],
+        'query-input' => 'required name=search_term_string',
+    ],
+];
+@endphp
+<script type="application/ld+json">{!! json_encode($websiteSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
+
 @endsection

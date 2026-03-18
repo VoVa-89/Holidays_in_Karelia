@@ -101,5 +101,32 @@
             </div>
         </div>
     </div>
+@push('schema')
+@php
+$aboutSchema = [
+    '@context'    => 'https://schema.org',
+    '@type'       => 'AboutPage',
+    'name'        => 'О нас — Отдых в Карелии',
+    'url'         => route('about'),
+    'inLanguage'  => 'ru-RU',
+    'description' => 'Живой гид по самым удивительным местам Карелии. Откройте для себя скрытые жемчужины, спланируйте маршрут мечты.',
+    'about' => [
+        '@type'     => 'Organization',
+        'name'      => 'Отдых в Карелии',
+        'url'       => url('/'),
+        'email'     => 'krupenkin.vov@yandex.ru',
+        'telephone' => '+7-921-222-30-98',
+        'address'   => [
+            '@type'           => 'PostalAddress',
+            'addressLocality' => 'Петрозаводск',
+            'addressRegion'   => 'Республика Карелия',
+            'addressCountry'  => 'RU',
+        ],
+    ],
+];
+@endphp
+<script type="application/ld+json">{!! json_encode($aboutSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
+
 @endsection
 
