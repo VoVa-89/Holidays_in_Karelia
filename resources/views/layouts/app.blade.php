@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="yandex-verification" content="698a7fb74872a63b" />
+    <meta name="google-site-verification" content="ukelw6X1ALIdOjkvB5ySWknmjGoIKP-NSChxtYuAcwg" />
 
     <title>@yield('title', 'Отдых в Карелии')</title>
     <meta name="description" content="@yield('description', 'Забудьте о скучных путеводителях! Наш сайт — это живой гид по самым удивительным местам Карелии. Откройте для себя скрытые жемчужины, спланируйте маршрут мечты и получите незабываемые впечатления.')">
