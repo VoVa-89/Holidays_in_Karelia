@@ -31,5 +31,6 @@ final class PostObserver
         Cache::forget('home_map_posts');
         Cache::forget('home_top_attractions');
         Cache::forget('home_top_rest_places');
+        Cache::forget('moderation_count');
     }
 }

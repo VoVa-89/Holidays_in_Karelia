@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /my-posts/
+Disallow: /tags/suggest
+Disallow: /login
+Disallow: /register
+Disallow: /password/
+Allow: /
+
+Sitemap: https://karelia-go.ru/sitemap.xml

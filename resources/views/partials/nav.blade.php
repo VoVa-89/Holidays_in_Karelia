@@ -46,6 +46,11 @@
 				<!-- Админ-панель (только для администраторов) -->
 				@auth
 					@if(auth()->user()->isAdmin())
+						@php
+							$moderationCount = cache()->remember('moderation_count', 60, fn () =>
+								\App\Models\Post::where('status', 'moderation')->count()
+							);
+						@endphp
 						<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle {{ request()->routeIs('admin.*') ? 'active' : '' }}" 
 					   href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
@@ -57,9 +62,9 @@
 								</a></li>
 								<li><a class="dropdown-item" href="{{ route('admin.moderation') }}">
 									<i class="fas fa-clipboard-check me-2"></i>Модерация
-									@if(\App\Models\Post::where('status', 'moderation')->count() > 0)
+									@if($moderationCount > 0)
 										<span class="badge bg-warning text-dark ms-2">
-											{{ \App\Models\Post::where('status', 'moderation')->count() }}
+											{{ $moderationCount }}
 										</span>
 									@endif
 								</a></li>

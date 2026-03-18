@@ -37,6 +37,20 @@ Route::view('/guidelines', 'pages.guidelines')->name('guidelines');
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
 
+// Sitemap
+Route::get('/sitemap.xml', function () {
+    $posts = \App\Models\Post::where('status', \App\Models\Post::STATUS_PUBLISHED)
+        ->select(['slug', 'updated_at'])
+        ->latest('updated_at')
+        ->get();
+
+    $categories = \App\Models\Category::select(['slug', 'updated_at'])->get();
+
+    return response()
+        ->view('sitemap', compact('posts', 'categories'))
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 // AJAX‑подсказки по тегам
 Route::get('/tags/suggest', [TagController::class, 'suggest'])->name('tags.suggest');
 

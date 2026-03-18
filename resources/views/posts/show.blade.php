@@ -33,9 +33,9 @@
 											<i class="fas fa-calendar me-1"></i>{{ $post->created_at->format('d.m.Y') }}
 										</div>
 										<div class="hero-stats">
-											<span><i class="fas fa-eye me-1"></i>{{ $post->views_count }}</span>
-											<span><i class="fas fa-comments me-1"></i>{{ $post->comments_count }}</span>
-											<span><i class="fas fa-star me-1"></i>{{ $post->ratings_count }}</span>
+										<span><i class="fas fa-eye me-1"></i>{{ $post->views }}</span>
+										<span><i class="fas fa-comments me-1"></i>{{ $post->comments_count }}</span>
+										<span><i class="fas fa-star me-1"></i>{{ $post->ratings_count }}</span>
 										</div>
 									</div>
 								</div>

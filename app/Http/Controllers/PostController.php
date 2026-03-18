@@ -86,7 +86,7 @@ final class PostController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $posts = $query->paginate(4)->withQueryString();
+        $posts = $query->paginate(6)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
         return view('posts.index', compact('posts', 'categories'));
@@ -230,6 +230,7 @@ final class PostController extends Controller
     public function show(string $slug): View
     {
         $post = Post::with(['user', 'category', 'photos', 'comments.user', 'ratings'])
+            ->withCount(['comments', 'ratings'])
             ->where('slug', $slug)
             ->firstOrFail();
 
