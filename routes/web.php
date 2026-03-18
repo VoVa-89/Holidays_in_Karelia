@@ -46,9 +46,10 @@ Route::get('/sitemap.xml', function () {
 
     $categories = \App\Models\Category::select(['slug', 'updated_at'])->get();
 
-    return response()
-        ->view('sitemap', compact('posts', 'categories'))
-        ->header('Content-Type', 'application/xml');
+    $content = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+        . view('sitemap', compact('posts', 'categories'))->render();
+
+    return response($content, 200)->header('Content-Type', 'text/xml');
 })->name('sitemap');
 
 // AJAX‑подсказки по тегам
