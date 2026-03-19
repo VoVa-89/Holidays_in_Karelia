@@ -66,7 +66,11 @@ final class PostController extends Controller
 
         // Поиск по заголовку
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search): void {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
         }
 
         // Сортировка
