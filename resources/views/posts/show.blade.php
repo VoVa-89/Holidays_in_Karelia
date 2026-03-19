@@ -96,6 +96,19 @@
 							{!! $post->description !!}
 						</div>
 
+						@if($post->tags->isNotEmpty())
+							<div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+								<span class="text-muted small"><i class="fas fa-tags me-1"></i>Теги:</span>
+								@foreach($post->tags as $tag)
+									<a href="{{ route('tags.show', $tag->slug) }}"
+									   class="badge text-decoration-none"
+									   style="background: var(--bs-primary-bg-subtle, #cfe2ff); color: var(--bs-primary-text-emphasis, #084298); font-weight: 500; font-size: 0.8rem; padding: 5px 10px; border-radius: 20px;">
+										<i class="fas fa-tag me-1" style="font-size: 0.7rem;"></i>{{ $tag->name }}
+									</a>
+								@endforeach
+							</div>
+						@endif
+
 						@if($post->website_url)
 							<div class="mt-3">
 								<a href="{{ $post->website_url }}" target="_blank" rel="noopener noreferrer" 

@@ -21,7 +21,7 @@ final class TagController extends Controller
     {
         $tag = Tag::where('slug', $slug)->firstOrFail();
 
-        $posts = Post::with(['user', 'category', 'mainPhoto'])
+        $posts = Post::with(['user', 'category', 'mainPhoto', 'tags'])
             ->where('status', Post::STATUS_PUBLISHED)
             ->whereHas('tags', fn($q) => $q->where('slug', $slug))
             ->latest()

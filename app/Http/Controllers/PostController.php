@@ -236,7 +236,7 @@ final class PostController extends Controller
      */
     public function show(string $slug): View
     {
-        $post = Post::with(['user', 'category', 'photos', 'comments.user', 'ratings'])
+        $post = Post::with(['user', 'category', 'photos', 'comments.user', 'ratings', 'tags'])
             ->withCount(['comments', 'ratings'])
             ->where('slug', $slug)
             ->firstOrFail();

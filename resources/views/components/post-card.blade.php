@@ -51,8 +51,8 @@
 		@if($post->tags && $post->tags->isNotEmpty())
 			<div class="post-card-tags">
 				@foreach($post->tags as $tag)
-					<a href="{{ route('posts.index', array_merge(request()->except(['page', 'tag']), ['tag' => $tag->slug])) }}"
-					   class="tag-badge tag-badge--post-card {{ request('tag') === $tag->slug ? 'tag-badge--active' : '' }}">
+					<a href="{{ route('tags.show', $tag->slug) }}"
+					   class="tag-badge tag-badge--post-card {{ request()->routeIs('tags.show') && request()->route('slug') === $tag->slug ? 'tag-badge--active' : '' }}">
 						<i class="fas fa-tag"></i>{{ $tag->name }}
 					</a>
 				@endforeach
