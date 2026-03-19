@@ -9,9 +9,9 @@ use Intervention\Image\Laravel\Facades\Image;
 
 final class ImageService
 {
-    private const int MAX_WIDTH  = 1920;
-    private const int MAX_HEIGHT = 1080;
-    private const int QUALITY    = 82;
+    private const MAX_WIDTH  = 1920;
+    private const MAX_HEIGHT = 1080;
+    private const QUALITY    = 82;
 
     /**
      * Оптимизирует изображение: уменьшает до MAX и конвертирует в WebP.
