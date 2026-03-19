@@ -7,7 +7,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Laravel\Facades\Image;
 
-final readonly class ImageService
+final class ImageService
 {
     private const int MAX_WIDTH  = 1920;
     private const int MAX_HEIGHT = 1080;
