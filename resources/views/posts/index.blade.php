@@ -1,7 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Посты — Отдых в Карелии')
-@section('description', 'Список постов: достопримечательности и места отдыха Карелии с фото, описаниями и рейтингами.')
+@section('title', ($currentCategory ? $currentCategory->name . ' — ' : '') . 'Посты — Отдых в Карелии')
+@section('description', $currentCategory
+    ? 'Места и достопримечательности Карелии в категории «' . $currentCategory->name . '» с фото и рейтингами.'
+    : 'Список постов: достопримечательности и места отдыха Карелии с фото, описаниями и рейтингами.'
+)
 
 @section('content')
 	<div class="container my-4">

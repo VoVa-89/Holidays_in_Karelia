@@ -52,8 +52,11 @@ Route::get('/sitemap.xml', function () {
     return response($content, 200)->header('Content-Type', 'text/xml');
 })->name('sitemap');
 
-// AJAX‑подсказки по тегам
+// AJAX‑подсказки по тегам (должен быть ВЫШЕ {slug}, иначе "suggest" будет трактован как slug)
 Route::get('/tags/suggest', [TagController::class, 'suggest'])->name('tags.suggest');
+
+// Страницы тегов
+Route::get('/tags/{slug}', [TagController::class, 'show'])->name('tags.show');
 
 // Маршруты для постов
 Route::prefix('posts')->name('posts.')->group(function () {

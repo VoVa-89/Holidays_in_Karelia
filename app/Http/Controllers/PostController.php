@@ -43,15 +43,16 @@ final class PostController extends Controller
             ->where('status', 'published');
 
         // Фильтрация по категории (поддержка id или slug)
+        $currentCategory = null;
         if ($request->filled('category')) {
             $categoryParam = (string) $request->get('category');
-            $category = Category::query()
+            $currentCategory = Category::query()
                 ->when(is_numeric($categoryParam), fn($q) => $q->where('id', (int) $categoryParam))
                 ->when(!is_numeric($categoryParam), fn($q) => $q->orWhere('slug', $categoryParam))
                 ->first();
 
-            if ($category) {
-                $query->where('category_id', $category->id);
+            if ($currentCategory) {
+                $query->where('category_id', $currentCategory->id);
             }
         }
 
@@ -93,7 +94,7 @@ final class PostController extends Controller
         $posts = $query->paginate(6)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
-        return view('posts.index', compact('posts', 'categories'));
+        return view('posts.index', compact('posts', 'categories', 'currentCategory'));
     }
 
     /**
@@ -240,8 +241,12 @@ final class PostController extends Controller
 
         $this->authorize('view', $post);
 
-        // Увеличиваем счетчик просмотров
-        $post->incrementViews();
+        // Увеличиваем счетчик просмотров только один раз за сессию
+        $sessionKey = 'viewed_post_' . $post->id;
+        if (!session()->has($sessionKey)) {
+            $post->incrementViews();
+            session()->put($sessionKey, true);
+        }
 
         return view('posts.show', compact('post'));
     }
