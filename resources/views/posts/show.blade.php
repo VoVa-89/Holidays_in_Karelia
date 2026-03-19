@@ -163,6 +163,49 @@
 							<li class="mb-2"><i class="fas fa-folder text-primary me-2"></i><a href="{{ route('categories.show', $post->category->slug) }}" class="text-decoration-none">{{ $post->category->name }}</a></li>
 							<li class="mb-2"><i class="fas fa-user text-primary me-2"></i>{{ $post->user->name }}</li>
 							<li class="mb-2"><i class="far fa-clock text-primary me-2"></i>{{ $post->created_at->format('d.m.Y H:i') }}</li>
+
+							@if($post->latitude && $post->longitude)
+								<li class="pt-2 mt-1 border-top">
+									<div class="dropdown">
+										<button class="btn btn-outline-success btn-sm w-100 dropdown-toggle"
+												type="button"
+												data-bs-toggle="dropdown"
+												aria-expanded="false">
+											<i class="fas fa-route me-2"></i>Проложить маршрут
+										</button>
+										<ul class="dropdown-menu w-100">
+											<li>
+												<a class="dropdown-item" href="#"
+												   onclick="openNavApp('yandexnavi://build_route_on_map?lat_to={{ $post->latitude }}&lon_to={{ $post->longitude }}&zoom=14','https://yandex.ru/maps/?rtext=~{{ $post->latitude }},{{ $post->longitude }}&rtt=auto'); return false;">
+													<i class="fas fa-car me-2 text-danger"></i>Яндекс.Навигатор
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
+												   href="https://yandex.ru/maps/?rtext=~{{ $post->latitude }},{{ $post->longitude }}&rtt=auto"
+												   target="_blank" rel="noopener noreferrer">
+													<i class="fas fa-map-marked-alt me-2 text-warning"></i>Яндекс.Карты
+												</a>
+											</li>
+											<li><hr class="dropdown-divider"></li>
+											<li>
+												<a class="dropdown-item"
+												   href="https://www.google.com/maps/dir/?api=1&destination={{ $post->latitude }},{{ $post->longitude }}"
+												   target="_blank" rel="noopener noreferrer">
+													<i class="fab fa-google me-2 text-primary"></i>Google Maps
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
+												   href="https://2gis.ru/routeTo?point={{ $post->longitude }},{{ $post->latitude }}&m=walk"
+												   target="_blank" rel="noopener noreferrer">
+													<i class="fas fa-map-pin me-2 text-success"></i>2ГИС
+												</a>
+											</li>
+										</ul>
+									</div>
+								</li>
+							@endif
 						</ul>
 					</div>
 				</div>
@@ -207,7 +250,7 @@
 						<div class="mt-3">
 							<a href="{{ route('posts.index', ['category' => $post->category->slug]) }}"
 							   class="btn btn-outline-primary btn-sm w-100">
-								<i class="fas fa-list me-1"></i>Все в «{{ $post->category->name }}»
+								<i class="fas fa-list me-1"></i>Cмотреть все «{{ $post->category->name }}»
 							</a>
 						</div>
 					</div>

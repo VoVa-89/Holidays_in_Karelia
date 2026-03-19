@@ -50,6 +50,62 @@
                 <i class="fas fa-info-circle me-1"></i>
                 Координаты: {{ number_format($post->latitude, 6) }}, {{ number_format($post->longitude, 6) }}
             </div>
+
+            {{-- Кнопка маршрута --}}
+            <div class="mt-3 d-flex align-items-center gap-3 flex-wrap">
+                <div class="dropdown">
+                    <button class="btn btn-success btn-sm dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        <i class="fas fa-route me-2"></i>Проложить маршрут
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><h6 class="dropdown-header text-muted" style="font-size:0.75rem;">Выберите навигатор</h6></li>
+
+                        <li>
+                            <a class="dropdown-item" href="#"
+                               onclick="openNavApp('yandexnavi://build_route_on_map?lat_to={{ $post->latitude }}&lon_to={{ $post->longitude }}&zoom=14','https://yandex.ru/maps/?rtext=~{{ $post->latitude }},{{ $post->longitude }}&rtt=auto'); return false;">
+                                <i class="fas fa-car me-2 text-danger"></i>Яндекс.Навигатор
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://yandex.ru/maps/?rtext=~{{ $post->latitude }},{{ $post->longitude }}&rtt=auto"
+                               target="_blank" rel="noopener noreferrer">
+                                <i class="fas fa-map-marked-alt me-2 text-warning"></i>Яндекс.Карты
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://www.google.com/maps/dir/?api=1&destination={{ $post->latitude }},{{ $post->longitude }}"
+                               target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-google me-2 text-primary"></i>Google Maps
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://2gis.ru/routeTo?point={{ $post->longitude }},{{ $post->latitude }}&m=walk"
+                               target="_blank" rel="noopener noreferrer">
+                                <i class="fas fa-map-pin me-2 text-success"></i>2ГИС
+                            </a>
+                        </li>
+                        <li id="apple-maps-item-{{ $post->id }}" style="display:none;">
+                            <a class="dropdown-item"
+                               href="maps://maps.apple.com/?daddr={{ $post->latitude }},{{ $post->longitude }}&dirflg=d">
+                                <i class="fab fa-apple me-2"></i>Apple Maps
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <a href="https://yandex.ru/maps/?ll={{ $post->longitude }},{{ $post->latitude }}&z=14&pt={{ $post->longitude }},{{ $post->latitude }},pm2rdm"
+                   class="text-muted small text-decoration-none d-none d-md-inline"
+                   target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-external-link-alt me-1"></i>Открыть в Яндекс.Картах
+                </a>
+            </div>
         </div>
     </div>
 
@@ -253,8 +309,51 @@
                 placemark.balloon.open();
             }
 
+            // === Навигация: маршрут до места ===
+
+            // Показываем Apple Maps только на iOS / macOS с тачскрином
+            function detectAppleMaps() {
+                const isIOS  = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isMacT = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+                if (isIOS || isMacT) {
+                    document.querySelectorAll('[id^="apple-maps-item-"]').forEach(function(el) {
+                        el.style.display = 'block';
+                    });
+                }
+            }
+
+            // Открыть навигационное приложение через iframe-трюк (страница не уходит).
+            // На десктопе — сразу открывает веб-версию.
+            function openNavApp(appUrl, webFallback) {
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+                if (!isMobile) {
+                    window.open(webFallback, '_blank');
+                    return;
+                }
+
+                let appOpened = false;
+                const blurHandler = function() { appOpened = true; };
+                window.addEventListener('blur', blurHandler, { once: true });
+
+                // Скрытый iframe: если схема неизвестна — тихо падает, не трогая основное окно
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = appUrl;
+                document.body.appendChild(iframe);
+
+                setTimeout(function() {
+                    window.removeEventListener('blur', blurHandler);
+                    iframe.remove();
+                    if (!appOpened) {
+                        window.open(webFallback, '_blank');
+                    }
+                }, 1500);
+            }
+
             // Инициализируем карту при загрузке страницы
             document.addEventListener('DOMContentLoaded', function() {
+                detectAppleMaps();
                 console.log('🗺️ Карта поста {{ $post->id }}: начинаем загрузку...');
                 
                 // Используем глобальную функцию загрузки API если доступна
