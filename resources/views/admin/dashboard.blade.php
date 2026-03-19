@@ -123,6 +123,44 @@
 			</div>
 		</div>
 
+		<!-- Опубликованные места по разделам -->
+		<div class="row g-4 mb-4">
+			<div class="col-12">
+				<div class="card border-primary">
+					<div class="card-header bg-primary text-white">
+						<h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i>Опубликованные места (после модерации)</h5>
+					</div>
+					<div class="card-body">
+						<p class="mb-3">
+							<strong>Всего опубликовано на сайте:</strong>
+							<span class="badge bg-success fs-6">{{ $stats['published_posts'] }}</span>
+						</p>
+						<div class="row g-4">
+							@foreach ($placesOverviewCategories as $category)
+								<div class="col-md-6">
+									<div class="border rounded p-3 h-100 bg-light bg-opacity-50">
+										<h6 class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+											<span><i class="fas fa-folder-open text-primary me-2"></i>{{ $category->name }}</span>
+											<span class="badge bg-secondary">Постов: {{ $category->published_posts_count }}</span>
+										</h6>
+										<ul class="list-unstyled small mb-0" style="max-height: 320px; overflow-y: auto;">
+											@forelse ($category->posts as $post)
+												<li class="py-2 border-bottom border-white">
+													<a href="{{ route('posts.show', $post->slug) }}" target="_blank" rel="noopener noreferrer">{{ $post->title }}</a>
+												</li>
+											@empty
+												<li class="text-muted py-2">Нет опубликованных постов в этом разделе</li>
+											@endforelse
+										</ul>
+									</div>
+								</div>
+							@endforeach
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div class="row g-4">
 			<!-- Левая колонка -->
 			<div class="col-lg-8">

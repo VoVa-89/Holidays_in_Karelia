@@ -128,6 +128,29 @@ final class AdminController extends Controller
             ->get()
             ->pluck('count', 'status');
 
+        // Опубликованные места по разделам (для блока на дашборде)
+        $placesOverviewSlugs = ['dostoprimechatelnosti', 'mesta-otdykha'];
+        $placesOverviewCategories = Category::query()
+            ->whereIn('slug', $placesOverviewSlugs)
+            ->with([
+                'posts' => static function ($q): void {
+                    $q->where('status', Post::STATUS_PUBLISHED)
+                        ->orderBy('title');
+                },
+            ])
+            ->withCount([
+                'posts as published_posts_count' => static function ($q): void {
+                    $q->where('status', Post::STATUS_PUBLISHED);
+                },
+            ])
+            ->get()
+            ->sortBy(static function (Category $category) use ($placesOverviewSlugs): int {
+                $pos = array_search($category->slug, $placesOverviewSlugs, true);
+
+                return $pos !== false ? $pos : PHP_INT_MAX;
+            })
+            ->values();
+
         return view('admin.dashboard', compact(
             'stats',
             'postsByDay',
@@ -138,7 +161,8 @@ final class AdminController extends Controller
             'tempUsers',
             'topRatedUsers',
             'recentRatings',
-            'postsByStatus'
+            'postsByStatus',
+            'placesOverviewCategories'
         ));
     }
 
