@@ -167,8 +167,55 @@
 					</div>
 				</div>
 
-				@can('update', $post)
-					<div class="d-flex gap-2 mb-4">
+			{{-- Похожие посты --}}
+			@if($relatedPosts->isNotEmpty())
+				<div class="card mb-4">
+					<div class="card-body">
+						<h5 class="mb-3">
+							<i class="fas fa-compass text-primary me-2"></i>Похожие места
+						</h5>
+						<div class="d-flex flex-column gap-3">
+							@foreach($relatedPosts as $related)
+								<div class="d-flex gap-2 align-items-start">
+									@if($related->mainPhoto)
+										<img src="{{ asset($related->mainPhoto->photo_path) }}"
+											 alt="{{ $related->title }}"
+											 class="rounded flex-shrink-0"
+											 style="width: 64px; height: 64px; object-fit: cover;">
+									@else
+										<div class="rounded flex-shrink-0 bg-light d-flex align-items-center justify-content-center"
+											 style="width: 64px; height: 64px;">
+											<i class="fas fa-image text-muted"></i>
+										</div>
+									@endif
+									<div class="overflow-hidden">
+										<a href="{{ route('posts.show', $related->slug) }}"
+										   class="d-block text-decoration-none text-dark fw-medium lh-sm mb-1"
+										   style="font-size: 0.875rem;">
+											{{ Str::limit($related->title, 50) }}
+										</a>
+										@if($related->rating > 0)
+											<small class="text-muted">
+												<i class="fas fa-star text-warning me-1" style="font-size: 0.7rem;"></i>
+												{{ number_format($related->rating, 1) }}
+											</small>
+										@endif
+									</div>
+								</div>
+							@endforeach
+						</div>
+						<div class="mt-3">
+							<a href="{{ route('posts.index', ['category' => $post->category->slug]) }}"
+							   class="btn btn-outline-primary btn-sm w-100">
+								<i class="fas fa-list me-1"></i>Все в «{{ $post->category->name }}»
+							</a>
+						</div>
+					</div>
+				</div>
+			@endif
+
+			@can('update', $post)
+				<div class="d-flex gap-2 mb-4">
 						<a href="{{ route('posts.edit', $post->slug) }}" class="btn btn-outline-secondary"><i class="fas fa-edit me-2"></i>Редактировать</a>
 						<form method="POST" action="{{ route('posts.update', $post->slug) }}" class="d-none" id="post-update-form">@csrf @method('PUT')</form>
 						@can('delete', $post)

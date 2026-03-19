@@ -250,7 +250,17 @@ final class PostController extends Controller
             session()->put($sessionKey, true);
         }
 
-        return view('posts.show', compact('post'));
+        // Похожие посты: та же категория, топ по рейтингу и просмотрам
+        $relatedPosts = Post::with(['mainPhoto'])
+            ->where('status', Post::STATUS_PUBLISHED)
+            ->where('category_id', $post->category_id)
+            ->where('id', '!=', $post->id)
+            ->orderByDesc('rating')
+            ->orderByDesc('views')
+            ->limit(4)
+            ->get();
+
+        return view('posts.show', compact('post', 'relatedPosts'));
     }
 
     /**
