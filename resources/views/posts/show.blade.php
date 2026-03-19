@@ -167,7 +167,7 @@
 							@if($post->latitude && $post->longitude)
 								<li class="pt-2 mt-1 border-top">
 									<div class="dropdown">
-										<button class="btn btn-outline-success btn-sm w-100 dropdown-toggle"
+										<button class="btn btn-outline-success btn-sm w-100 dropdown-toggle border-2 shadow-sm"
 												type="button"
 												data-bs-toggle="dropdown"
 												aria-expanded="false">
