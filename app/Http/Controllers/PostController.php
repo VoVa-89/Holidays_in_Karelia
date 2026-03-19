@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\PostPhoto;
 use App\Models\Tag;
+use App\Services\ImageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,8 +27,9 @@ use Illuminate\View\View;
  */
 final class PostController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ImageService $imageService,
+    ) {
         $this->middleware('auth')->except(['index', 'show']);
     }
 
@@ -471,6 +473,10 @@ final class PostController extends Controller
 
                 // Перемещаем файл
                 $photo->move($directory, $filename);
+
+                // Оптимизируем: resize до 1920×1080 + конвертация в WebP
+                // При ошибке возвращает исходный $path — загрузка не падает
+                $path = $this->imageService->optimize(public_path($path), $path);
 
                 $isMain = false;
                 if (is_numeric($mainIndex) && $index === (int)$mainIndex) {
