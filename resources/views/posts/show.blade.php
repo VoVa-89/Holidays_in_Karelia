@@ -223,6 +223,89 @@
 					</div>
 				</div>
 
+			{{-- Рядом: ST_Distance_Sphere (MySQL 8 / MariaDB), до 2 постов на категорию, 50 км --}}
+			@if($showNearbyBlock)
+				<div class="card mb-4 border-info">
+					<div class="card-body">
+						<h5 class="mb-3">
+							<i class="fas fa-location-arrow text-info me-2"></i>Что находится рядом с «{{ $post->title }}»
+						</h5>
+						@if($nearbyAttractions->isNotEmpty())
+							<h6 class="text-secondary small text-uppercase mb-2">Достопримечательности</h6>
+							<div class="d-flex flex-column gap-3 mb-4">
+								@foreach($nearbyAttractions as $near)
+									<div class="d-flex gap-2 align-items-start">
+										@if($near->mainPhoto)
+											<img src="{{ asset($near->mainPhoto->photo_path) }}"
+												 alt="{{ $near->title }}"
+												 class="rounded flex-shrink-0"
+												 style="width: 64px; height: 64px; object-fit: cover;">
+										@else
+											<div class="rounded flex-shrink-0 bg-light d-flex align-items-center justify-content-center"
+												 style="width: 64px; height: 64px;">
+												<i class="fas fa-image text-muted"></i>
+											</div>
+										@endif
+										<div class="overflow-hidden flex-grow-1">
+											<a href="{{ route('posts.show', $near->slug) }}"
+											   class="d-block text-decoration-none text-dark fw-medium lh-sm mb-1"
+											   style="font-size: 0.875rem;">
+												{{ Str::limit($near->title, 60) }}
+											</a>
+											<small class="text-muted">
+												<i class="fas fa-route me-1" style="font-size: 0.7rem;"></i>
+												{{ number_format((float) $near->distance_meters / 1000, 1, ',', ' ') }} км
+											</small>
+										</div>
+									</div>
+								@endforeach
+							</div>
+							<div class="mb-3">
+								<a href="{{ route('posts.index', ['category' => \App\Services\NearbyPostsService::SLUG_ATTRACTIONS]) }}"
+								   class="btn btn-outline-info btn-sm w-100">
+									<i class="fas fa-list me-1"></i>Все достопримечательности
+								</a>
+							</div>
+						@endif
+						@if($nearbyRestPlaces->isNotEmpty())
+							<h6 class="text-secondary small text-uppercase mb-2">Места отдыха</h6>
+							<div class="d-flex flex-column gap-3 mb-3">
+								@foreach($nearbyRestPlaces as $near)
+									<div class="d-flex gap-2 align-items-start">
+										@if($near->mainPhoto)
+											<img src="{{ asset($near->mainPhoto->photo_path) }}"
+												 alt="{{ $near->title }}"
+												 class="rounded flex-shrink-0"
+												 style="width: 64px; height: 64px; object-fit: cover;">
+										@else
+											<div class="rounded flex-shrink-0 bg-light d-flex align-items-center justify-content-center"
+												 style="width: 64px; height: 64px;">
+												<i class="fas fa-image text-muted"></i>
+											</div>
+										@endif
+										<div class="overflow-hidden flex-grow-1">
+											<a href="{{ route('posts.show', $near->slug) }}"
+											   class="d-block text-decoration-none text-dark fw-medium lh-sm mb-1"
+											   style="font-size: 0.875rem;">
+												{{ Str::limit($near->title, 60) }}
+											</a>
+											<small class="text-muted">
+												<i class="fas fa-route me-1" style="font-size: 0.7rem;"></i>
+												{{ number_format((float) $near->distance_meters / 1000, 1, ',', ' ') }} км
+											</small>
+										</div>
+									</div>
+								@endforeach
+							</div>
+							<a href="{{ route('posts.index', ['category' => \App\Services\NearbyPostsService::SLUG_REST]) }}"
+							   class="btn btn-outline-info btn-sm w-100">
+								<i class="fas fa-list me-1"></i>Все места отдыха
+							</a>
+						@endif
+					</div>
+				</div>
+			@endif
+
 			{{-- Похожие посты --}}
 			@if($relatedPosts->isNotEmpty())
 				<div class="card mb-4">

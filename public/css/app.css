@@ -835,6 +835,20 @@ textarea.form-control {
     box-shadow: var(--k-shadow-sm);
 }
 
+/* Как у .btn-outline-primary: явная рамка 2px; цвет остаётся Bootstrap info */
+.btn-outline-info {
+    background: transparent;
+    color: var(--bs-info);
+    border: 2px solid var(--bs-info);
+}
+
+.btn-outline-info:hover {
+    background: var(--bs-info);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: var(--k-shadow-sm);
+}
+
 .btn-danger {
     background: #dc3545;
     color: white;

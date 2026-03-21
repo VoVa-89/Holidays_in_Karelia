@@ -9,8 +9,10 @@ use App\Models\Post;
 use App\Models\PostPhoto;
 use App\Models\Tag;
 use App\Services\ImageService;
+use App\Services\NearbyPostsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +31,7 @@ final class PostController extends Controller
 {
     public function __construct(
         private readonly ImageService $imageService,
+        private readonly NearbyPostsService $nearbyPostsService,
     ) {
         $this->middleware('auth')->except(['index', 'show']);
     }
@@ -93,7 +96,9 @@ final class PostController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $posts = $query->paginate(6)->withQueryString();
+        /** @var LengthAwarePaginator $posts */
+        $posts = $query->paginate(6);
+        $posts->withQueryString();
         $categories = Category::orderBy('name')->get();
 
         return view('posts.index', compact('posts', 'categories', 'currentCategory'));
@@ -250,6 +255,16 @@ final class PostController extends Controller
             session()->put($sessionKey, true);
         }
 
+        $nearbyAttractions = $this->nearbyPostsService->findNearbyPublished(
+            $post,
+            NearbyPostsService::SLUG_ATTRACTIONS,
+        );
+        $nearbyRestPlaces = $this->nearbyPostsService->findNearbyPublished(
+            $post,
+            NearbyPostsService::SLUG_REST,
+        );
+        $showNearbyBlock = $nearbyAttractions->isNotEmpty() || $nearbyRestPlaces->isNotEmpty();
+
         // Похожие посты: та же категория, топ по рейтингу и просмотрам
         $relatedPosts = Post::with(['mainPhoto'])
             ->where('status', Post::STATUS_PUBLISHED)
@@ -260,7 +275,13 @@ final class PostController extends Controller
             ->limit(4)
             ->get();
 
-        return view('posts.show', compact('post', 'relatedPosts'));
+        return view('posts.show', compact(
+            'post',
+            'relatedPosts',
+            'nearbyAttractions',
+            'nearbyRestPlaces',
+            'showNearbyBlock',
+        ));
     }
 
     /**
