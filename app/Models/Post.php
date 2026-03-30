@@ -164,17 +164,25 @@ final class Post extends Model
     }
 
     /**
-     * Получить краткое описание (первые N символов)
-     * 
-     * Удаляет HTML теги и обрезает текст до указанной длины.
-     * По умолчанию возвращает первые 150 символов.
-     * 
-     * @param int $length Максимальная длина описания
-     * @return string Краткое описание
+     * Текст описания без HTML, с декодированием сущностей (&nbsp; и т.д.).
+     */
+    public function getPlainDescription(): string
+    {
+        return html_entity_decode(
+            strip_tags((string) $this->description),
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8',
+        );
+    }
+
+    /**
+     * Краткое описание: без HTML, сущности декодированы, обрезка до N символов.
+     *
+     * @param int $length Максимальная длина
      */
     public function getExcerpt(int $length = 150): string
     {
-        return Str::limit(strip_tags($this->description), $length);
+        return Str::limit($this->getPlainDescription(), $length);
     }
 
     /**

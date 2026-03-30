@@ -35,16 +35,16 @@
 	<!-- Содержимое карточки -->
 	<div class="card-body d-flex flex-column">
 		<!-- Заголовок -->
-		<h5 class="card-title">
-			<a href="{{ route('posts.show', $post->slug) }}" 
-			   class="text-decoration-none text-dark stretched-link">
+		<h5 class="card-title mb-2">
+			<a href="{{ route('posts.show', $post->slug) }}"
+			   class="text-decoration-none stretched-link">
 				{{ Str::limit($post->title, 60) }}
 			</a>
 		</h5>
 
 		<!-- Краткое описание -->
 		<p class="card-text text-muted flex-grow-1">
-			{{ Str::limit(strip_tags($post->description), 120) }}
+			{{ $post->getExcerpt(120) }}
 		</p>
 
 		{{-- Теги поста --}}
@@ -170,9 +170,13 @@
 	}
 	
 	.post-card .card-title a {
+		font-weight: 700;
+		font-size: 1.125rem;
+		line-height: 1.35;
+		color: var(--text-dark);
 		transition: color 0.3s ease;
 	}
-	
+
 	.post-card:hover .card-title a {
 		color: var(--bs-primary) !important;
 	}

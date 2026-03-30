@@ -3,9 +3,9 @@
 @php $mainPhoto = $post->getMainPhoto(); @endphp
 
 @section('title', $post->title . ' — Отдых в Карелии')
-@section('description', Str::limit(strip_tags($post->description), 150))
+@section('description', $post->getExcerpt(150))
 @section('og:title', $post->title . ' — Отдых в Карелии')
-@section('og:description', Str::limit(strip_tags($post->description), 150))
+@section('og:description', $post->getExcerpt(150))
 @section('og:image', $mainPhoto ? asset($mainPhoto->photo_path) : asset('images/og-image.jpg'))
 
 @section('content')
@@ -603,11 +603,7 @@
 	    '@context'      => 'https://schema.org',
 	    '@type'         => 'TouristAttraction',
 	    'name'          => $post->title,
-	    'description'   => html_entity_decode(
-	                           strip_tags($post->description),
-	                           ENT_QUOTES | ENT_HTML5,
-	                           'UTF-8'
-	                       ),
+	    'description'   => $post->getPlainDescription(),
 	    'url'           => route('posts.show', $post->slug),
 	    'inLanguage'    => 'ru-RU',
 	    'datePublished' => $post->created_at->toIso8601String(),

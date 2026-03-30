@@ -136,7 +136,7 @@
 											</div>
 										@endif
 
-										<p class="card-text">{{ Str::limit(strip_tags($post->description), 150) }}</p>
+										<p class="card-text">{{ $post->getExcerpt(150) }}</p>
 									</div>
 									
 									<div class="col-md-4">
