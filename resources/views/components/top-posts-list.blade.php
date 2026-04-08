@@ -21,33 +21,30 @@
 				Пока нет постов
 			</div>
 		@else
-			<div class="row g-2" style="height: 220px;">
+			<div class="top-posts-grid">
 
-				{{-- Большая карточка (первый пост) --}}
-				<div class="col-7 h-100">
+				{{-- Большая карточка (первый пост): ячейка grid, ссылка заполняет высоту --}}
+				<div class="top-posts-grid__featured">
 					@php $featured = $posts->first(); @endphp
 					@php $featuredPhoto = $featured->mainPhoto; @endphp
 
 					<a href="{{ route('posts.show', $featured->slug) }}"
-					   class="text-decoration-none d-block position-relative rounded-3 overflow-hidden h-100">
+					   class="text-decoration-none d-block position-relative overflow-hidden w-100 top-posts-grid__featured-link">
 
 						{{-- Фото или заглушка --}}
 						@if($featuredPhoto)
 							<img src="{{ asset($featuredPhoto->photo_path) }}"
 								 alt="{{ $featured->title }}"
-								 class="w-100 h-100"
-								 style="object-fit: cover; position: absolute; inset: 0;">
+								 class="w-100 h-100 top-posts-grid__featured-img"
+								 style="object-fit: cover;">
 						@else
-							<div class="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center"
-								 style="position: absolute; inset: 0;">
+							<div class="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center top-posts-grid__featured-img">
 								<i class="fas fa-image fa-3x text-white opacity-50"></i>
 							</div>
 						@endif
 
 						{{-- Градиентный оверлей --}}
-						<div style="position: absolute; inset: 0;
-									background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);">
-						</div>
+						<div class="top-posts-grid__featured-overlay"></div>
 
 						{{-- Текст поверх фото --}}
 						<div class="position-absolute bottom-0 start-0 p-3 text-white w-100">
@@ -64,12 +61,12 @@
 				</div>
 
 				{{-- Две маленькие карточки (посты 2 и 3) --}}
-				<div class="col-5 h-100 d-flex flex-column gap-2">
+				<div class="top-posts-grid__side d-flex flex-column gap-2">
 					@foreach($posts->skip(1) as $post)
 						@php $photo = $post->mainPhoto; @endphp
 
 						<a href="{{ route('posts.show', $post->slug) }}"
-						   class="text-decoration-none d-flex gap-2 rounded-3 border p-2 bg-light flex-fill overflow-hidden">
+						   class="text-decoration-none d-flex gap-2 rounded-3 border p-2 bg-light overflow-hidden top-posts-grid__side-link">
 
 							{{-- Thumbnail --}}
 							<div class="flex-shrink-0 rounded-2 overflow-hidden" style="width: 64px; height: 64px;">
@@ -112,3 +109,67 @@
 		@endif
 	</div>
 </div>
+
+<style>
+	/* 7:5 как col-7 / col-5; фиксированная высота — одна точка правды */
+	.top-posts-grid {
+		display: grid;
+		grid-template-columns: 7fr 5fr;
+		gap: 0.5rem;
+		height: 220px;
+		min-height: 220px;
+		align-items: stretch;
+		overflow: hidden;
+		min-width: 0;
+	}
+
+	.top-posts-grid__featured,
+	.top-posts-grid__side {
+		min-width: 0;
+		min-height: 0;
+	}
+
+	.top-posts-grid__featured-link {
+		height: 100%;
+		border-radius: var(--bs-border-radius-lg);
+	}
+
+	.top-posts-grid__featured-img {
+		position: absolute;
+		inset: 0;
+	}
+
+	.top-posts-grid__featured-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.1) 60%, transparent 100%);
+		pointer-events: none;
+	}
+
+	.top-posts-grid__side-link {
+		flex: 1 1 0;
+		min-height: 0;
+	}
+
+	@media (max-width: 575.98px) {
+		.top-posts-grid {
+			grid-template-columns: 1fr;
+			grid-auto-rows: auto;
+			height: auto;
+			min-height: 0;
+		}
+
+		.top-posts-grid__featured {
+			min-height: 180px;
+		}
+
+		.top-posts-grid__featured-link {
+			min-height: 180px;
+		}
+
+		.top-posts-grid__side-link {
+			flex: 0 0 auto;
+			min-height: 72px;
+		}
+	}
+</style>
