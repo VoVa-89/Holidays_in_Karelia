@@ -467,6 +467,28 @@ h1, h2, h3, h4, h5, h6 {
     margin: 1rem 0;
 }
 
+/* Сворачивание длинного описания поста (превью по высоте) */
+.post-description-collapse__inner.is-collapsed {
+    max-height: 320px;
+    overflow: hidden;
+    position: relative;
+}
+
+.post-description-collapse__inner.is-collapsed::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 56px;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        var(--bs-body-bg, #fff)
+    );
+}
+
 /* ===== ФОРМЫ ===== */
 .form-header {
     text-align: center;

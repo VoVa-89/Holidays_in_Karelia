@@ -92,8 +92,22 @@
 							</div>
 						@endif
 
-						<div class="post-content">
-							{!! $post->description !!}
+						<div class="post-description-collapse">
+							<div
+								class="post-content post-description-collapse__inner"
+								id="post-description-{{ $post->id }}"
+							>
+								{!! $post->description !!}
+							</div>
+							<button
+								type="button"
+								class="btn btn-outline-primary btn-sm mt-2 post-description-collapse__toggle d-none"
+								aria-expanded="false"
+								data-label-expand="Показать полностью"
+								data-label-collapse="Свернуть"
+							>
+								Показать полностью
+							</button>
 						</div>
 
 						@if($post->tags->isNotEmpty())
@@ -899,9 +913,54 @@
 				}
 			}
 			
+			function initPostDescriptionCollapse() {
+				document.querySelectorAll('.post-description-collapse').forEach(function (root) {
+					var inner = root.querySelector('.post-description-collapse__inner');
+					var btn = root.querySelector('.post-description-collapse__toggle');
+					if (!inner || !btn) {
+						return;
+					}
+
+					function setExpanded(expanded) {
+						btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+						btn.textContent = expanded
+							? (btn.getAttribute('data-label-collapse') || 'Свернуть')
+							: (btn.getAttribute('data-label-expand') || 'Показать полностью');
+					}
+
+					function applyShortContent() {
+						inner.classList.remove('is-collapsed');
+						btn.classList.add('d-none');
+					}
+
+					inner.classList.add('is-collapsed');
+
+					requestAnimationFrame(function () {
+						if (!inner.textContent || !inner.textContent.trim()) {
+							applyShortContent();
+							return;
+						}
+
+						if (inner.scrollHeight <= inner.clientHeight) {
+							applyShortContent();
+							return;
+						}
+
+						btn.classList.remove('d-none');
+						setExpanded(false);
+					});
+
+					btn.addEventListener('click', function () {
+						var collapsed = inner.classList.toggle('is-collapsed');
+						setExpanded(!collapsed);
+					});
+				});
+			}
+
 			// Initialize gallery when DOM is ready
 			document.addEventListener('DOMContentLoaded', function() {
 				new PhotoGallery();
+				initPostDescriptionCollapse();
 			});
 
 		</script>
