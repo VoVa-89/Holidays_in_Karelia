@@ -173,7 +173,7 @@
 				<x-post-map :post="$post" />
 
 				<!-- Компонент рейтинга -->
-				<x-rating :post="$post" :canVote="auth()->check() && auth()->id() !== $post->user_id" :userRating="auth()->check() ? $post->ratings()->where('user_id', auth()->id())->first()?->value : null" />
+				<x-rating :post="$post" :canVote="auth()->check()" :userRating="auth()->check() ? $post->ratings()->where('voter_key', 'u:' . auth()->id())->first()?->value : null" />
 
 				<!-- Компонент комментариев -->
 				<x-comments :post="$post" />

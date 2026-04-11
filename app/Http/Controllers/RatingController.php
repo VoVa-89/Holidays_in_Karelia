@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\Rating;
+use App\Services\PostRatingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ final class RatingController extends Controller
      * @return JsonResponse|RedirectResponse
      * @throws ValidationException
      */
-    public function store(Request $request, string $postSlug): JsonResponse|RedirectResponse
+    public function store(Request $request, string $postSlug, PostRatingService $postRatingService): JsonResponse|RedirectResponse
     {
         $post = Post::where('slug', $postSlug)->firstOrFail();
 
@@ -100,6 +101,7 @@ final class RatingController extends Controller
 
         $userId = Auth::id();
         $ratingValue = (int) $validated['value'];
+        $voterKey = 'u:' . $userId;
 
         Log::info('Rating submission attempt', [
             'post_id' => $post->id,
@@ -111,33 +113,31 @@ final class RatingController extends Controller
         // Проверяем права на создание/обновление оценки
         $this->authorize('create', Rating::class);
 
-        // Ищем существующую оценку пользователя для этого поста
         $existingRating = Rating::where('post_id', $post->id)
-            ->where('user_id', $userId)
+            ->where('voter_key', $voterKey)
             ->first();
 
         // Используем транзакцию для атомарности операции
         $isUpdate = $existingRating !== null;
 
         try {
-            DB::transaction(function () use ($post, $userId, $ratingValue, $existingRating) {
+            DB::transaction(function () use ($post, $userId, $ratingValue, $existingRating, $voterKey, $postRatingService) {
                 if ($existingRating) {
                     // Обновляем существующую оценку
                     $this->authorize('update', $existingRating);
                     $existingRating->update(['value' => $ratingValue]);
                     Log::info('Rating updated', ['rating_id' => $existingRating->id, 'new_value' => $ratingValue]);
                 } else {
-                    // Создаем новую оценку
                     $newRating = Rating::create([
                         'post_id' => $post->id,
                         'user_id' => $userId,
+                        'voter_key' => $voterKey,
                         'value' => $ratingValue,
                     ]);
                     Log::info('Rating created', ['rating_id' => $newRating->id, 'value' => $ratingValue]);
                 }
 
-                // Пересчитываем средний рейтинг поста
-                $this->updatePostRating($post);
+                $postRatingService->recalculateAverage($post->fresh());
             });
         } catch (\Exception $e) {
             Log::error('Rating transaction failed', [
@@ -174,35 +174,5 @@ final class RatingController extends Controller
         return redirect()
             ->route('posts.show', $post->slug)
             ->with('success', "Ваша оценка успешно {$action}!");
-    }
-
-    /**
-     * Пересчет среднего рейтинга поста
-     * 
-     * @param Post $post
-     * @return void
-     */
-    private function updatePostRating(Post $post): void
-    {
-        $averageRating = Rating::where('post_id', $post->id)
-            ->avg('value');
-
-        Log::info('Updating post rating', [
-            'post_id' => $post->id,
-            'raw_average' => $averageRating,
-            'average_type' => gettype($averageRating)
-        ]);
-
-        // Преобразуем в число и обрабатываем случай null
-        $averageRating = $averageRating ? (float) $averageRating : 0.0;
-
-        $post->update([
-            'rating' => round($averageRating, 2)
-        ]);
-
-        Log::info('Post rating updated', [
-            'post_id' => $post->id,
-            'new_rating' => round($averageRating, 2)
-        ]);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -28,7 +29,7 @@ final class Honeypot
         // 1) Поле-приманка: если не пусто — это бот
         $baitField = (string) $request->input('website', '');
         if ($baitField !== '') {
-            return redirect()->back()->withInput()->with('error', 'Подозрительная активность обнаружена.');
+            return $this->fail($request, 'Подозрительная активность обнаружена.');
         }
 
         // 2) Проверка времени заполнения формы
@@ -36,14 +37,25 @@ final class Honeypot
         if ($startedAt > 0) {
             $elapsed = time() - $startedAt;
             if ($elapsed < $this->minSecondsToSubmit) {
-                return redirect()->back()->withInput()->with('error', 'Форма отправлена слишком быстро.');
+                return $this->fail($request, 'Форма отправлена слишком быстро.');
             }
         } else {
-            // Если поле отсутствует — тоже считаем подозрительным
-            return redirect()->back()->withInput()->with('error', 'Не удалось проверить отправку формы.');
+            return $this->fail($request, 'Не удалось проверить отправку формы.');
         }
 
         return $next($request);
+    }
+
+    private function fail(Request $request, string $message): RedirectResponse|Response
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 422);
+        }
+
+        return redirect()->back()->withInput()->with('error', $message);
     }
 }
 

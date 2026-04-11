@@ -1,7 +1,7 @@
 @props(['post', 'comments' => null])
 
 @php
-    $comments = $comments ?? $post->comments()->with('user')->latest()->paginate(10);
+    $comments = $comments ?? $post->comments()->approved()->with('user')->latest()->paginate(10);
 @endphp
 
 <div class="comments-section mt-5">
@@ -74,7 +74,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">
                             <i class="fas fa-info-circle me-1"></i>
-                            Комментарий будет опубликован после модерации
+                            Публикуется сразу после отправки
                         </small>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-paper-plane me-2"></i>Отправить
@@ -84,22 +84,51 @@
             </div>
         </div>
     @else
-        <!-- Призыв к регистрации для неавторизованных -->
+        @php
+            $guestCommentCaptcha = app(\App\Services\MathCaptcha::class)->issue('guest_comment');
+        @endphp
         <div class="card mb-4">
-            <div class="card-body text-center">
-                <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
-                <h5>Войдите, чтобы оставить комментарий</h5>
-                <p class="text-muted">Только зарегистрированные пользователи могут комментировать посты.</p>
-                <div class="btn-group">
-                    <a href="{{ route('login') }}" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt me-2"></i>Войти
-                    </a>
-                    <a href="{{ route('register') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-user-plus me-2"></i>Регистрация
-                    </a>
-                </div>
+            <div class="card-body">
+                <h5 class="mb-3"><i class="fas fa-pen me-2"></i>Оставить отзыв</h5>
+                <p class="text-muted small">Отзыв появится на сайте после проверки модератором. Нужна простая математика и несколько секунд на заполнение формы.</p>
+                <form id="guest-comment-form" method="POST" action="{{ route('guest.comments.store', $post->slug) }}">
+                    @csrf
+                    <input type="hidden" name="captcha_id" value="{{ $guestCommentCaptcha['id'] }}">
+                    <input type="hidden" name="form_started_at" id="guest-comment-form-started" value="">
+                    <div class="mb-3" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+                        <label for="guest-comment-website">Не заполнять</label>
+                        <input type="text" name="website" id="guest-comment-website" value="" tabindex="-1" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="guest_display_name" class="form-label">Ваше имя или ник</label>
+                        <input type="text" name="guest_display_name" id="guest_display_name" class="form-control" maxlength="100" required>
+                        <div class="invalid-feedback d-block"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="guest-comment-content" class="form-label">Текст отзыва</label>
+                        <textarea name="content" id="guest-comment-content" class="form-control" rows="4" required></textarea>
+                        <div class="invalid-feedback d-block"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="guest-captcha-answer" class="form-label">Сколько будет: <strong>{{ $guestCommentCaptcha['label'] }}</strong>?</label>
+                        <input type="text" name="captcha_answer" id="guest-captcha-answer" class="form-control" inputmode="numeric" autocomplete="off" required>
+                        <div class="invalid-feedback d-block"></div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                        <div class="btn-group">
+                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm">Войти</a>
+                            <a href="{{ route('register') }}" class="btn btn-outline-secondary btn-sm">Регистрация</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="guest-comment-submit">
+                            <i class="fas fa-paper-plane me-2"></i>Отправить на модерацию
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
+        <script>
+            document.getElementById('guest-comment-form-started').value = Math.floor(Date.now() / 1000);
+        </script>
     @endauth
 
     <!-- Список комментариев -->
@@ -122,7 +151,7 @@
                                 <!-- Заголовок комментария -->
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
-                                        <h6 class="mb-0 fw-bold">{{ $comment->user->name }}</h6>
+                                        <h6 class="mb-0 fw-bold">{{ $comment->user?->name ?? $comment->guest_display_name ?? 'Гость' }}</h6>
                                         <small class="text-muted">
                                             <i class="fas fa-clock me-1"></i>
                                             {{ $comment->created_at->diffForHumans() }}
@@ -144,7 +173,7 @@
                                                 <li>
                                                     <button class="dropdown-item text-danger delete-comment-btn" 
                                                             data-comment-id="{{ $comment->id }}"
-                                                            data-comment-author="{{ $comment->user->name }}">
+                                                            data-comment-author="{{ $comment->user?->name ?? $comment->guest_display_name ?? 'Гость' }}">
                                                         <i class="fas fa-trash me-2"></i>Удалить
                                                     </button>
                                                 </li>
@@ -413,6 +442,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             throw { type: 'forbidden', message: 'Для добавления комментариев необходимо подтвердить email. Проверьте почту или отправьте письмо повторно в профиле.' };
                         });
                     }
+                    if (response.status === 429) {
+                        throw { type: 'throttle', message: 'Слишком частые запросы. Подождите около минуты и попробуйте снова.' };
+                    }
                     // Для ошибок валидации (422) пытаемся получить JSON
                     if (response.status === 422) {
                         return response.json().then(data => {
@@ -458,6 +490,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     showNotification(error.message, 'error');
                     return;
                 }
+                if (error.type === 'throttle') {
+                    showNotification(error.message, 'error');
+                    return;
+                }
                 // Обрабатываем ошибки валидации
                 if (error.type === 'validation') {
                     if (error.data.errors) {
@@ -471,6 +507,66 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .finally(() => {
                 // Восстанавливаем кнопку
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+
+    const guestCommentForm = document.getElementById('guest-comment-form');
+    if (guestCommentForm) {
+        guestCommentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('guest-comment-submit');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Отправка...';
+            submitBtn.disabled = true;
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        throw { type: 'throttle', message: 'Слишком частые запросы. Подождите около минуты и попробуйте снова.' };
+                    }
+                    if (response.status === 422) {
+                        return response.json().then(data => { throw { type: 'validation', data: data }; });
+                    }
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Ошибка');
+                    }).catch(() => { throw new Error('Ошибка сервера'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message || 'Отзыв отправлен на модерацию.', 'success');
+                    guestCommentForm.reset();
+                    document.getElementById('guest-comment-form-started').value = Math.floor(Date.now() / 1000);
+                    setTimeout(() => { window.location.reload(); }, 1200);
+                } else {
+                    showNotification(data.message || 'Ошибка', 'error');
+                }
+            })
+            .catch(error => {
+                if (error.type === 'throttle') {
+                    showNotification(error.message, 'error');
+                    return;
+                }
+                if (error.type === 'validation' && error.data && error.data.errors) {
+                    showValidationErrors(error.data.errors);
+                } else {
+                    showNotification(error.message || 'Не удалось отправить отзыв', 'error');
+                }
+            })
+            .finally(() => {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             });

@@ -48,6 +48,7 @@ final class AdminController extends Controller
             'active_users' => User::where('created_at', '>=', now()->subDays(30))->count(),
             'total_categories' => Category::count(),
             'total_comments' => Comment::count(),
+            'pending_comments' => Comment::where('status', Comment::STATUS_PENDING)->count(),
             'total_ratings' => Rating::count(),
             'average_rating' => Rating::avg('value') ?? 0,
         ];
@@ -683,6 +684,51 @@ final class AdminController extends Controller
                 ->back()
                 ->with('error', 'Произошла ошибка при удалении пользователя: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Очередь гостевых отзывов (комментариев)
+     */
+    public function commentsModeration(): View
+    {
+        $comments = Comment::with(['post'])
+            ->where('status', Comment::STATUS_PENDING)
+            ->orderBy('created_at', 'asc')
+            ->paginate(25);
+
+        return view('admin.comments-moderation', compact('comments'));
+    }
+
+    public function approveComment(int $id): RedirectResponse
+    {
+        $comment = Comment::findOrFail($id);
+        if ($comment->status !== Comment::STATUS_PENDING) {
+            return redirect()
+                ->back()
+                ->with('error', 'Комментарий не ожидает модерации.');
+        }
+
+        $comment->update(['status' => Comment::STATUS_APPROVED]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Отзыв одобрен и опубликован.');
+    }
+
+    public function rejectComment(int $id): RedirectResponse
+    {
+        $comment = Comment::findOrFail($id);
+        if ($comment->status !== Comment::STATUS_PENDING) {
+            return redirect()
+                ->back()
+                ->with('error', 'Комментарий не ожидает модерации.');
+        }
+
+        $comment->update(['status' => Comment::STATUS_REJECTED]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Отзыв отклонён.');
     }
 
     /**

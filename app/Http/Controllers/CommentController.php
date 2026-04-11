@@ -118,7 +118,9 @@ final class CommentController extends Controller
         $comment = Comment::create([
             'post_id' => $post->id,
             'user_id' => Auth::id(),
+            'guest_display_name' => null,
             'content' => $validated['content'],
+            'status' => Comment::STATUS_APPROVED,
         ]);
 
         if ($request->expectsJson()) {

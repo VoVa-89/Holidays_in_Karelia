@@ -1,7 +1,7 @@
 @props(['post', 'userRating' => null, 'canVote' => true])
 
 @php
-    $userRating = $userRating ?? (auth()->check() ? $post->ratings()->where('user_id', auth()->id())->first()?->value : null);
+    $userRating = $userRating ?? (auth()->check() ? $post->ratings()->where('voter_key', 'u:' . auth()->id())->first()?->value : null);
     $averageRating = $post->rating ?? 0;
     $totalVotes = $post->ratings()->count();
 @endphp
@@ -99,16 +99,38 @@
             </div>
         @endif
     @else
+        @php
+            $guestRatingCaptcha = app(\App\Services\MathCaptcha::class)->issue('guest_rating');
+        @endphp
         <div class="rating-guest">
-            <div class="alert alert-light py-2">
-                <small class="text-muted">
-                    <i class="fas fa-sign-in-alt me-1"></i>
-                    <a href="{{ route('login') }}" class="text-decoration-none">Войдите</a> 
-                    или 
-                    <a href="{{ route('register') }}" class="text-decoration-none">зарегистрируйтесь</a> 
-                    для оценки
-                </small>
+            <div class="px-3 py-2 mb-3 rounded-3 bg-warning bg-opacity-10 border-start border-4 border-warning shadow-sm">
+                <span class="d-block fw-semibold fs-6 text-body-emphasis lh-sm">Оцените место</span>
             </div>
+            <form id="guest-rating-form" method="POST" action="{{ route('guest.ratings.store', $post->slug) }}" class="rating-form">
+                @csrf
+                <input type="hidden" name="value" id="guest-rating-value" value="0">
+                <input type="hidden" name="captcha_id" value="{{ $guestRatingCaptcha['id'] }}">
+                <input type="hidden" name="form_started_at" id="guest-rating-started" value="">
+                <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+                    <label for="guest-rating-website">Не заполнять</label>
+                    <input type="text" name="website" id="guest-rating-website" tabindex="-1" autocomplete="off">
+                </div>
+                <div class="guest-rating-stars-interactive rating-stars-interactive mb-2">
+                    @for($i = 1; $i <= 5; $i++)
+                        <button type="button" class="guest-rating-star" data-rating="{{ $i }}" title="{{ $i }}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                    @endfor
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Сколько будет: <strong>{{ $guestRatingCaptcha['label'] }}</strong>?</label>
+                    <input type="text" name="captcha_answer" class="form-control form-control-sm" inputmode="numeric" autocomplete="off" required>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary" id="guest-submit-rating-btn" disabled>
+                    <i class="fas fa-star me-1"></i>Оценить
+                </button>
+            </form>
+            <script>document.getElementById('guest-rating-started').value = Math.floor(Date.now() / 1000);</script>
         </div>
     @endauth
 
@@ -229,6 +251,22 @@
         color: var(--bs-warning);
     }
 
+    .guest-rating-star {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--bs-muted);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0.25rem;
+        border-radius: 0.375rem;
+    }
+
+    .guest-rating-star:hover,
+    .guest-rating-star.active {
+        color: var(--bs-warning);
+    }
+
     @keyframes starGlow {
         0% { transform: scale(1); }
         50% { transform: scale(1.2); }
@@ -316,14 +354,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const ratingComponent = document.querySelector('.rating-component');
     if (!ratingComponent) return;
 
-    const ratingForm = ratingComponent.querySelector('#rating-form');
-    const ratingStars = ratingComponent.querySelectorAll('.rating-star');
-    const ratingValueInput = ratingComponent.querySelector('#rating-value');
-    const submitBtn = ratingComponent.querySelector('#submit-rating-btn');
-    const changeBtn = ratingComponent.querySelector('#change-rating-btn');
-    const quickRate5Btn = ratingComponent.querySelector('#quick-rate-5-btn');
-    const ratingActions = ratingComponent.querySelector('.rating-actions');
-    const starsContainer = ratingComponent.querySelector('.rating-stars-interactive');
+    const voteSectionEl = ratingComponent.querySelector('.rating-vote-section');
+    const ratingForm = voteSectionEl ? voteSectionEl.querySelector('#rating-form') : null;
+    const ratingStars = voteSectionEl ? voteSectionEl.querySelectorAll('.rating-star') : [];
+    const ratingValueInput = voteSectionEl ? voteSectionEl.querySelector('#rating-value') : null;
+    const submitBtn = voteSectionEl ? voteSectionEl.querySelector('#submit-rating-btn') : null;
+    const changeBtn = voteSectionEl ? voteSectionEl.querySelector('#change-rating-btn') : null;
+    const quickRate5Btn = voteSectionEl ? voteSectionEl.querySelector('#quick-rate-5-btn') : null;
+    const ratingActions = voteSectionEl ? voteSectionEl.querySelector('.rating-actions') : null;
+    const starsContainer = voteSectionEl ? voteSectionEl.querySelector('.rating-stars-interactive') : null;
     
     let currentRating = {{ $userRating ?? 0 }};
     let isVoting = false;
@@ -510,6 +549,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             throw { type: 'forbidden', message: 'Для оценки постов необходимо подтвердить email. Проверьте почту или отправьте письмо повторно в профиле.' };
                         });
                     }
+                    if (response.status === 429) {
+                        throw { type: 'throttle', message: 'Слишком частые запросы. Подождите около минуты и попробуйте снова.' };
+                    }
                     // Попробуем получить текст ошибки
                     return response.text().then(text => {
                         console.log('Error response text:', text);
@@ -537,6 +579,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Rating submission error:', error);
                 if (error.type === 'forbidden') {
+                    showRatingNotification(error.message, 'error');
+                    return;
+                }
+                if (error.type === 'throttle') {
                     showRatingNotification(error.message, 'error');
                     return;
                 }
@@ -651,6 +697,89 @@ document.addEventListener('DOMContentLoaded', function() {
                     ratingForm.dispatchEvent(new Event('submit'));
                 }
             }, 100);
+        });
+    }
+
+    // --- Гостевая оценка ---
+    const guestForm = ratingComponent.querySelector('#guest-rating-form');
+    if (guestForm) {
+        let guestRating = 0;
+        const guestVal = guestForm.querySelector('#guest-rating-value');
+        const guestStars = guestForm.querySelectorAll('.guest-rating-star');
+        const guestSubmit = guestForm.querySelector('#guest-submit-rating-btn');
+        const guestStarsBox = guestForm.querySelector('.guest-rating-stars-interactive');
+
+        function guestHighlight(v) {
+            guestStars.forEach((star, idx) => {
+                if (idx + 1 <= v) star.classList.add('active');
+                else star.classList.remove('active');
+            });
+        }
+
+        guestStars.forEach(star => {
+            star.addEventListener('click', function() {
+                guestRating = parseInt(this.dataset.rating, 10);
+                if (guestVal) guestVal.value = guestRating;
+                guestHighlight(guestRating);
+                if (guestSubmit) guestSubmit.disabled = guestRating < 1;
+            });
+        });
+
+        if (guestStarsBox) {
+            guestStarsBox.addEventListener('mouseleave', function() {
+                guestHighlight(guestRating);
+            });
+            guestStars.forEach(star => {
+                star.addEventListener('mouseenter', function() {
+                    const v = parseInt(this.dataset.rating, 10);
+                    guestHighlight(v);
+                });
+            });
+        }
+
+        guestForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (guestRating < 1) return;
+            const fd = new FormData(guestForm);
+            if (guestSubmit) {
+                guestSubmit.disabled = true;
+                guestSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>...';
+            }
+            fetch(guestForm.action, {
+                method: 'POST',
+                body: fd,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => {
+                if (!r.ok) {
+                    if (r.status === 429) {
+                        throw { type: 'throttle', message: 'Слишком частые запросы. Подождите около минуты и попробуйте снова.' };
+                    }
+                    return r.json().then(d => { throw new Error(d.message || 'Ошибка'); });
+                }
+                return r.json();
+            })
+            .then(data => {
+                showRatingNotification(data.message || 'Спасибо!', 'success');
+                const rv = ratingComponent.querySelector('.rating-value');
+                if (rv && data.rating !== undefined) rv.textContent = parseFloat(data.rating).toFixed(1);
+                const rc = ratingComponent.querySelector('.rating-count small');
+                if (rc && data.totalVotes !== undefined) {
+                    rc.innerHTML = '<i class="fas fa-users me-1"></i>' + data.totalVotes + ' оценок';
+                }
+                guestForm.closest('.rating-guest').innerHTML = '<div class="alert alert-success py-2 small mb-0"><i class="fas fa-check me-1"></i>Оценка учтена. Спасибо!</div>';
+            })
+            .catch(err => {
+                const msg = err.type === 'throttle' ? err.message : (err.message || 'Не удалось сохранить оценку');
+                showRatingNotification(msg, 'error');
+                if (guestSubmit) {
+                    guestSubmit.disabled = false;
+                    guestSubmit.innerHTML = '<i class="fas fa-star me-1"></i>Оценить';
+                }
+            });
         });
     }
 });

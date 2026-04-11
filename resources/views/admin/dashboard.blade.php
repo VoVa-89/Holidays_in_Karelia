@@ -11,7 +11,13 @@
 					<h1 class="h3 mb-0"><i class="fas fa-tachometer-alt text-primary me-2"></i>Панель администратора</h1>
 					<div class="btn-group">
 						<a href="{{ route('admin.moderation') }}" class="btn btn-outline-primary">
-							<i class="fas fa-clipboard-check me-2"></i>Модерация
+							<i class="fas fa-clipboard-check me-2"></i>Модерация постов
+						</a>
+						<a href="{{ route('admin.comments.moderation') }}" class="btn btn-outline-primary position-relative">
+							<i class="fas fa-comments me-2"></i>Отзывы
+							@if(($stats['pending_comments'] ?? 0) > 0)
+								<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $stats['pending_comments'] }}</span>
+							@endif
 						</a>
 						<a href="{{ route('admin.logs') }}" class="btn btn-outline-secondary">
 							<i class="fas fa-file-alt me-2"></i>Логи
@@ -491,7 +497,13 @@
 							<div class="col-6">
 								<div class="text-center">
 									<h4 class="text-success mb-0">{{ $stats['total_comments'] }}</h4>
-									<small class="text-muted">Комментариев</small>
+									<small class="text-muted">Комментариев (всего)</small>
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="text-center">
+									<h4 class="text-danger mb-0">{{ $stats['pending_comments'] ?? 0 }}</h4>
+									<small class="text-muted">Отзывов в очереди</small>
 								</div>
 							</div>
 							<div class="col-6">
@@ -561,7 +573,7 @@
 								</div>
 								<div class="flex-grow-1 ms-2">
 									<div class="d-flex justify-content-between">
-										<strong class="small">{{ $rating->user->name }}</strong>
+										<strong class="small">{{ $rating->user?->name ?? 'Гость' }}</strong>
 									<div class="d-flex align-items-center">
 										@for($i = 1; $i <= 5; $i++)
 											@if($i <= $rating->value)
@@ -601,7 +613,7 @@
 								</div>
 								<div class="flex-grow-1 ms-2">
 									<div class="d-flex justify-content-between">
-										<strong class="small">{{ $comment->user->name }}</strong>
+										<strong class="small">{{ $comment->user?->name ?? $comment->guest_display_name ?? 'Гость' }}</strong>
 										<small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
 									</div>
 									<p class="small mb-1">{{ Str::limit($comment->content, 50) }}</p>

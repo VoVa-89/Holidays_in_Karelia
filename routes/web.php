@@ -3,6 +3,8 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\GuestCommentController;
+use App\Http\Controllers\GuestRatingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyPostsController;
 use App\Http\Controllers\PostController;
@@ -124,6 +126,15 @@ Route::middleware(['auth','verified.message'])->prefix('ratings')->name('ratings
     Route::post('/posts/{postSlug}', [RatingController::class, 'store'])->name('store');
 });
 
+// Гостевые оценки и отзывы (капча + honeypot + throttle)
+Route::middleware(['throttle:guest-rating', 'honeypot'])->group(function () {
+    Route::post('/guest/ratings/posts/{postSlug}', [GuestRatingController::class, 'store'])->name('guest.ratings.store');
+});
+
+Route::middleware(['throttle:guest-comment', 'honeypot'])->group(function () {
+    Route::post('/guest/comments/posts/{postSlug}', [GuestCommentController::class, 'store'])->name('guest.comments.store');
+});
+
 // Админ-панель (только для администраторов)
 Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->group(function () {
     // Главная страница админ-панели
@@ -133,6 +144,10 @@ Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->gro
     Route::get('/moderation', [AdminController::class, 'moderation'])->name('moderation');
     Route::post('/posts/{id}/approve', [AdminController::class, 'approvePost'])->name('posts.approve');
     Route::post('/posts/{id}/reject', [AdminController::class, 'rejectPost'])->name('posts.reject');
+
+    Route::get('/comments-moderation', [AdminController::class, 'commentsModeration'])->name('comments.moderation');
+    Route::post('/comments/{id}/approve', [AdminController::class, 'approveComment'])->name('comments.approve');
+    Route::post('/comments/{id}/reject', [AdminController::class, 'rejectComment'])->name('comments.reject');
 
     // Мониторинг логов
     Route::get('/logs', [AdminController::class, 'logs'])->name('logs');

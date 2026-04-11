@@ -31,11 +31,28 @@ final class Comment extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const STATUS_APPROVED = 'approved';
+
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_REJECTED = 'rejected';
+
     protected $fillable = [
         'post_id',
         'user_id',
+        'guest_display_name',
         'content',
+        'status',
     ];
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder<Comment>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<Comment>
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
+    }
 
     /**
      * Получить пост, к которому относится комментарий
